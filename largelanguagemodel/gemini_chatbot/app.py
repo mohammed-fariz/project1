@@ -1,9 +1,11 @@
 # ------------------------------------
 # Gemini Chatbot with Memory (FastAPI)
 # LangChain v1.2.3
+# API-Failure Safe Version
 # ------------------------------------
 
 import os
+import traceback
 from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.templating import Jinja2Templates
@@ -14,20 +16,25 @@ from langchain_core.runnables import RunnableWithMessageHistory
 from langchain_community.chat_message_histories import ChatMessageHistory
 
 # ------------------------------------------------
-# API KEY (HARDCODED AS REQUESTED)
+# 1. API KEY (HARDCODED AS REQUESTED)
 # ------------------------------------------------
-os.environ["GOOGLE_API_KEY"] = "AIzaSyD0g51vFwcWKEgJ6kdzGUzN6hhOE1qrmeg"
+os.environ["GOOGLE_API_KEY"] = "AIzaSyByjM5S8tdgXJi0MAy6Lp9vYB39afpZxLA"
 
 # ------------------------------------------------
-# LOAD GEMINI MODEL
+# 2. LOAD GEMINI MODEL (SAFE INIT)
 # ------------------------------------------------
-llm = ChatGoogleGenerativeAI(
-    model="models/gemini-flash-latest",
-    temperature=0.7
-)
+try:
+    llm = ChatGoogleGenerativeAI(
+        model="models/gemini-flash-latest",
+        temperature=0.7
+    )
+except Exception as e:
+    print("❌ Failed to initialize Gemini model")
+    traceback.print_exc()
+    raise RuntimeError("Gemini model initialization failed")
 
 # ------------------------------------------------
-# MEMORY STORE
+# 3. MEMORY STORE
 # ------------------------------------------------
 store = {}
 
@@ -42,14 +49,14 @@ chatbot = RunnableWithMessageHistory(
 )
 
 # ------------------------------------------------
-# FASTAPI APP
+# 4. FASTAPI APP
 # ------------------------------------------------
-app = FastAPI()
+app = FastAPI(title="Gemini Chatbot")
 
 templates = Jinja2Templates(directory="templates")
 
 # ------------------------------------------------
-# SERVE FRONTEND
+# 5. FRONTEND
 # ------------------------------------------------
 @app.get("/", response_class=HTMLResponse)
 async def home(request: Request):
@@ -59,31 +66,48 @@ async def home(request: Request):
     )
 
 # ------------------------------------------------
-# CHAT API
+# 6. CHAT API (FAILURE SAFE)
 # ------------------------------------------------
 @app.post("/chat")
 async def chat(request: Request):
-    data = await request.json()
-    user_message = data.get("message", "").strip()
+    try:
+        data = await request.json()
+        user_message = data.get("message", "").strip()
 
-    if not user_message:
-        return JSONResponse({"response": ""})
+        if not user_message:
+            return JSONResponse({"response": ""})
 
-    session_id = request.client.host
+        session_id = request.client.host
 
-    response = chatbot.invoke(
-        [HumanMessage(content=user_message)],
-        config={"configurable": {"session_id": session_id}}
-    )
-
-    # Robust Gemini response handling
-    if isinstance(response.content, str):
-        bot_text = response.content
-    else:
-        bot_text = "".join(
-            part.get("text", "")
-            for part in response.content
-            if isinstance(part, dict)
+        response = chatbot.invoke(
+            [HumanMessage(content=user_message)],
+            config={"configurable": {"session_id": session_id}}
         )
 
-    return JSONResponse({"response": bot_text})
+        # Gemini response handling
+        if isinstance(response.content, str):
+            bot_text = response.content
+        else:
+            bot_text = "".join(
+                part.get("text", "")
+                for part in response.content
+                if isinstance(part, dict)
+            )
+
+        return JSONResponse({"response": bot_text})
+
+    except Exception as e:
+        # Log full error on server
+        print("❌ Gemini API call failed")
+        traceback.print_exc()
+
+        # Safe message for frontend
+        return JSONResponse(
+            {
+                "response": (
+                    "⚠️ Sorry, the AI service is temporarily unavailable.\n"
+                    "Please try again in a moment."
+                )
+            },
+            status_code=200
+        )
