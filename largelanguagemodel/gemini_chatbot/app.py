@@ -18,7 +18,7 @@ from langchain_community.chat_message_histories import ChatMessageHistory
 # ------------------------------------------------
 # 1. API KEY (HARDCODED AS REQUESTED)
 # ------------------------------------------------
-os.environ["GOOGLE_API_KEY"] = "AIzaSyByjM5S8tdgXJi0MAy6Lp9vYB39afpZxLA"
+os.environ["GOOGLE_API_KEY"] = "AIzaSyB2sLxjDGilvYOcjrJEROncuT6uB1-4TBM"
 
 # ------------------------------------------------
 # 2. LOAD GEMINI MODEL (SAFE INIT)
