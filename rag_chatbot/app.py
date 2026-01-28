@@ -20,13 +20,18 @@ from langchain_google_genai import ChatGoogleGenerativeAI
 # -----------------------------
 # SET GOOGLE API KEY
 # -----------------------------
-os.environ["GOOGLE_API_KEY"] = "AIzaSyDs43-lRrCsLyh5h8f9Ckm8vMoyZ4sD9Pk"
+os.environ["GOOGLE_API_KEY"] = "AIzaSyBQ9AktSrcy6G98TlFqYOIM91JcZPS4f1Y"
 
 # -----------------------------
 # LOAD & PREPARE VECTOR DB (ONCE AT STARTUP)
 # -----------------------------
-loader = PyPDFLoader("cs.pdf")
-documents = loader.load()
+pdf_files = ["cs.pdf", "transformers.pdf"]
+documents = []
+
+for pdf in pdf_files:
+    loader = PyPDFLoader(pdf)
+    documents.extend(loader.load())
+
 
 splitter = RecursiveCharacterTextSplitter(
     chunk_size=800,
