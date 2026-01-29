@@ -1,127 +1,140 @@
-# ------------------------------------
-# backend.py
-# LangChain + Gemini + FastAPI
-# PromptTemplate + Tool + Memory (NO AGENT)
-# ------------------------------------
-
+# app.py
 import os
-import traceback
+import json
+from typing import TypedDict
+
 from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.templating import Jinja2Templates
+from pydantic import BaseModel
 
-# ------------------------------------------------
-# API KEY
-# ------------------------------------------------
-os.environ["GOOGLE_API_KEY"] = "AIzaSyCotHbOC79dcmgXYb5kM_ht2iHJtaa7cvc"
-
-# ------------------------------------------------
-# GEMINI MODEL
-# ------------------------------------------------
 from langchain_google_genai import ChatGoogleGenerativeAI
+from langchain_core.messages import HumanMessage
+from langgraph.graph import StateGraph, END
+from langchain_community.utilities import DuckDuckGoSearchAPIWrapper
 
-llm = ChatGoogleGenerativeAI(
-    model="models/gemini-2.5-flash",
-    temperature=0.7
-)
+from mcp.client.http import HTTPClient   # ✅ HTTP CLIENT
 
-# ------------------------------------------------
-# PROMPT TEMPLATE
-# ------------------------------------------------
-from langchain_core.prompts import ChatPromptTemplate
+# --------------------------------------------------
+# ENV
+# --------------------------------------------------
+os.environ["GOOGLE_API_KEY"] = "YOUR_GEMINI_KEY"
 
-prompt = ChatPromptTemplate.from_messages([
-    ("system", "You are a helpful AI assistant."),
-    ("human", "{input}")
-])
-
-# ------------------------------------------------
-# TOOL
-# ------------------------------------------------
-from langchain.tools import tool
-
-@tool
-def get_weather(city: str) -> str:
-    """Get the weather of a city"""
-    return f"It is sunny in {city}"
-
-# ------------------------------------------------
-# MEMORY (SESSION BASED)
-# ------------------------------------------------
-from langchain_classic.memory import ConversationBufferMemory
-
-memory_store = {}
-
-def get_memory(session_id: str):
-    if session_id not in memory_store:
-        memory_store[session_id] = ConversationBufferMemory(
-            memory_key="chat_history",
-            return_messages=True
-        )
-    return memory_store[session_id]
-
-# ------------------------------------------------
-# FASTAPI APP
-# ------------------------------------------------
-app = FastAPI(title="Gemini LangChain Bot")
+# --------------------------------------------------
+# FASTAPI
+# --------------------------------------------------
+app = FastAPI(title="Agent Orchestrated MCP Chatbot")
 templates = Jinja2Templates(directory="templates")
+
+class ChatRequest(BaseModel):
+    message: str
 
 @app.get("/", response_class=HTMLResponse)
 async def home(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
 
-# ------------------------------------------------
-# CHAT ENDPOINT (NO AGENT)
-# ------------------------------------------------
+# --------------------------------------------------
+# LLM
+# --------------------------------------------------
+llm = ChatGoogleGenerativeAI(
+    model="gemini-flash-latest",
+    temperature=0
+)
+
+# --------------------------------------------------
+# MCP HTTP CLIENT
+# --------------------------------------------------
+mcp_client = HTTPClient("http://127.0.0.1:3333")
+
+# --------------------------------------------------
+# ORCHESTRATOR
+# --------------------------------------------------
+def orchestrator(text: str) -> str:
+    text = text.lower()
+
+    if any(k in text for k in ["add", "sum", "calculate"]):
+        return "math"
+    if any(k in text for k in ["email", "leave", "send mail"]):
+        return "email"
+    if any(k in text for k in ["search", "who is", "latest", "news"]):
+        return "search"
+    return "chat"
+
+# --------------------------------------------------
+# EMAIL AGENT (LANGGRAPH)
+# --------------------------------------------------
+class EmailState(TypedDict):
+    user_message: str
+    email_data: dict
+
+async def email_llm_node(state: EmailState):
+    plan = await llm.ainvoke([
+        HumanMessage(
+            content=(
+                "Extract email details strictly as JSON.\n\n"
+                "Keys: to_email, subject, body\n\n"
+                f"User request: {state['user_message']}\n\n"
+                "Return ONLY JSON."
+            )
+        )
+    ])
+
+    raw = plan.content
+    if isinstance(raw, list):
+        raw = raw[0]["text"]
+
+    return {
+        "user_message": state["user_message"],
+        "email_data": json.loads(raw)
+    }
+
+async def email_tool_node(state: EmailState):
+    await mcp_client.call_tool(
+        "send_leave_email",
+        state["email_data"]
+    )
+    return state
+
+email_graph = StateGraph(EmailState)
+email_graph.add_node("llm", email_llm_node)
+email_graph.add_node("send", email_tool_node)
+email_graph.set_entry_point("llm")
+email_graph.add_edge("llm", "send")
+email_graph.add_edge("send", END)
+
+email_agent = email_graph.compile()
+
+# --------------------------------------------------
+# CHAT ENDPOINT
+# --------------------------------------------------
 @app.post("/chat")
-async def chat(request: Request):
+async def chat(req: ChatRequest):
     try:
-        data = await request.json()
-        user_input = data.get("message", "").strip()
+        route = orchestrator(req.message)
 
-        if not user_input:
-            return JSONResponse({"response": ""})
+        if route == "chat":
+            reply = await llm.ainvoke([HumanMessage(content=req.message)])
+            return {"response": reply.content}
 
-        # Session-based memory
-        session_id = request.client.host
-        memory = get_memory(session_id)
+        if route == "math":
+            extract = await llm.ainvoke([
+                HumanMessage(content=f"Extract two numbers from: {req.message}")
+            ])
+            nums = [int(x) for x in extract.content.split() if x.isdigit()]
+            result = await mcp_client.call_tool("add", {"a": nums[0], "b": nums[1]})
+            return {"response": f"Result: {result.content}"}
 
-        # ---- MANUAL TOOL LOGIC ----
-        tool_context = ""
+        if route == "email":
+            await email_agent.ainvoke({"user_message": req.message})
+            return {"response": "✅ Email sent successfully"}
 
-        if "weather" in user_input.lower():
-            # very simple rule-based extraction
-            city = user_input.split()[-1]
-            tool_result = get_weather.run(city)
-            tool_context = f"\nTool result: {tool_result}"
+        if route == "search":
+            search = DuckDuckGoSearchAPIWrapper()
+            raw = search.run(req.message)
+            final = await llm.ainvoke([
+                HumanMessage(content=f"Answer clearly:\n{raw}")
+            ])
+            return {"response": final.content}
 
-        # Load previous chat history
-        history = memory.load_memory_variables({}).get("chat_history", [])
-
-        history_text = ""
-        for msg in history:
-            role = "User" if msg.type == "human" else "Assistant"
-            history_text += f"{role}: {msg.content}\n"
-
-        # Final input to LLM
-        final_input = f"{history_text}User: {user_input}{tool_context}"
-
-        # LLM call
-        response = llm.invoke(
-            prompt.format_messages(input=final_input)
-        )
-
-        # Save memory
-        memory.save_context(
-            {"input": user_input},
-            {"output": response.content}
-        )
-
-        return JSONResponse({"response": response.content})
-
-    except Exception:
-        traceback.print_exc()
-        return JSONResponse(
-            {"response": "⚠️ AI service unavailable. Please try again."},
-            status_code=200
-        )
+    except Exception as e:
+        return JSONResponse(status_code=500, content={"error": str(e)})
