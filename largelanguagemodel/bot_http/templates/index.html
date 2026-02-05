@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>AGent Bot</title>
+
+<style>
+body {
+  font-family: Arial, sans-serif;
+  background: #000;
+  color: white;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+/* HEADER */
+.header {
+  text-align: center;
+  padding: 12px;
+  font-size: 18px;
+  border-bottom: 1px solid #222;
+}
+
+/* CHAT AREA */
+#chat {
+  flex: 1;
+  padding: 20px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+/* MESSAGE */
+.msg {
+  margin-bottom: 12px;
+  padding: 10px;
+  border-radius: 8px;
+  max-width: 70%;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+/* USER → RIGHT */
+.user {
+  background: #4e4e4f;
+  margin-left: auto;
+}
+
+/* BOT → LEFT */
+.bot {
+  background: #444654;
+  margin-right: auto;
+}
+
+/* WELCOME MESSAGE (CENTER) */
+.welcome {
+  margin: auto;
+  color: #aaa;
+  font-size: 16px;
+  text-align: center;
+}
+
+/* INPUT AREA */
+#inputBox {
+  display: flex;
+  padding: 12px;
+  background: #111;
+  border-top: 1px solid #222;
+}
+
+/* TEXTAREA */
+textarea {
+  flex: 1;
+  padding: 10px;
+  border-radius: 6px;
+  border: none;
+  outline: none;
+  resize: none;
+  background: #000;
+  color: white;
+  font-size: 14px;
+  max-height: 150px;
+  overflow-y: auto;
+}
+
+/* SEND BUTTON */
+button {
+  margin-left: 10px;
+  padding: 10px 16px;
+  border: none;
+  border-radius: 6px;
+  background: #19c37d;
+  color: black;
+  font-size: 18px;
+  cursor: pointer;
+}
+</style>
+</head>
+
+<body>
+
+<div class="header">AgentChatBot</div>
+
+<div id="chat">
+  <!-- ✅ CENTER WELCOME MESSAGE -->
+  <div class="welcome" id="welcomeMsg">
+    👋 How can I assist you today?
+  </div>
+</div>
+
+<div id="inputBox">
+  <textarea
+    id="message"
+    rows="1"
+    placeholder="Type a message..."
+    onkeydown="handleKey(event)"
+    oninput="autoResize(this)"
+  ></textarea>
+  <button onclick="sendMessage()">↑</button>
+</div>
+
+<script>
+const chat = document.getElementById("chat");
+const input = document.getElementById("message");
+
+/* ENTER vs SHIFT+ENTER */
+function handleKey(e) {
+  if (e.key === "Enter" && !e.shiftKey) {
+    e.preventDefault();
+    sendMessage();
+  }
+}
+
+/* AUTO RESIZE */
+function autoResize(el) {
+  el.style.height = "auto";
+  el.style.height = el.scrollHeight + "px";
+}
+
+/* SEND MESSAGE */
+async function sendMessage() {
+  const text = input.value.trim();
+  if (!text) return;
+
+  // ❌ Remove welcome message on first input
+  const welcome = document.getElementById("welcomeMsg");
+  if (welcome) welcome.remove();
+
+  // User message (RIGHT)
+  const userDiv = document.createElement("div");
+  userDiv.className = "msg user";
+  userDiv.innerText = text;
+  chat.appendChild(userDiv);
+
+  input.value = "";
+  input.style.height = "auto";
+  chat.scrollTop = chat.scrollHeight;
+
+  const res = await fetch("/chat", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ message: text })
+  });
+
+  const data = await res.json();
+
+  // Bot message (LEFT)
+  const botDiv = document.createElement("div");
+  botDiv.className = "msg bot";
+  botDiv.innerText = data.response;
+  chat.appendChild(botDiv);
+
+  chat.scrollTop = chat.scrollHeight;
+}
+</script>
+
+</body>
+</html>
