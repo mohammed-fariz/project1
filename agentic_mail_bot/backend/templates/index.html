@@ -1,0 +1,494 @@
+<!-- <!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Agent Bot</title>
+
+<style>
+body {
+  font-family: Arial, sans-serif;
+  background: #000;
+  color: white;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+.header {
+  text-align: center;
+  padding: 12px;
+  font-size: 18px;
+  border-bottom: 1px solid #222;
+}
+
+#chat {
+  flex: 1;
+  padding: 20px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.msg {
+  margin-bottom: 12px;
+  padding: 10px;
+  border-radius: 8px;
+  max-width: 70%;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+.user {
+  background: #4e4e4f;
+  margin-left: auto;
+}
+
+.bot {
+  background: #444654;
+  margin-right: auto;
+}
+
+.welcome {
+  margin: auto;
+  color: #aaa;
+  font-size: 16px;
+  text-align: center;
+}
+
+#inputBox {
+  display: flex;
+  padding: 12px;
+  background: #111;
+  border-top: 1px solid #222;
+}
+
+textarea {
+  flex: 1;
+  padding: 10px;
+  border-radius: 6px;
+  border: none;
+  outline: none;
+  resize: none;
+  background: #000;
+  color: white;
+  font-size: 14px;
+  max-height: 150px;
+  overflow-y: auto;
+}
+
+button {
+  margin-left: 10px;
+  padding: 10px 16px;
+  border: none;
+  border-radius: 6px;
+  background: #19c37d;
+  color: black;
+  font-size: 18px;
+  cursor: pointer;
+}
+</style>
+</head>
+
+<body>
+
+<div class="header">AgentChatBot</div>
+
+<div id="chat">
+  <div class="welcome" id="welcomeMsg">
+    👋 How can I assist you today?
+  </div>
+</div>
+
+<div id="inputBox">
+  <textarea
+    id="message"
+    rows="1"
+    placeholder="Type a message..."
+    onkeydown="handleKey(event)"
+    oninput="autoResize(this)"
+  ></textarea>
+  <button onclick="sendMessage()">↑</button>
+</div>
+
+<script>
+  /* -------------------------------- */
+/* 🔥 Handle Gmail Connected Status */
+/* -------------------------------- */
+
+// 🔥 Listen for Gmail connection success
+// 🔥 Auto-detect Gmail connection
+// 🔥 Listen for Gmail OAuth popup success
+window.addEventListener("message", async function (event) {
+
+  if (event.data === "gmail_connected") {
+
+    const welcome = document.getElementById("welcomeMsg");
+    if (welcome) welcome.remove();
+
+    // Show system message in chat
+   
+
+    // Send hidden system message to backend
+    const res = await fetch("/chat", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        message: "system: gmail connected successfully",
+        user_id: USER_ID
+      })
+    });
+
+    const data = await res.json();
+
+    addMessage(data.response, "bot");
+  }
+});
+// 🔴 Listen for Gmail Disconnect
+window.addEventListener("message", async function (event) {
+
+  if (event.data === "gmail_disconnected") {
+
+    addMessage("⚠️ Gmail disconnected successfully.", "bot");
+
+    addMessage(`
+      👉 <a href="javascript:void(0);" 
+         onclick="window.open('/auth/google?user_id=${USER_ID}',
+         'gmailAuth','width=500,height=600');"
+         style="color:#19c37d;font-weight:bold;">
+         Connect Gmail
+       </a>
+    `, "bot");
+  }
+});
+const chat = document.getElementById("chat");
+const input = document.getElementById("message");
+
+/**
+ * 🔐 USER ID
+ * For now we hardcode.
+ * Later you can replace with login / session / JWT.
+ */
+
+let USER_ID = localStorage.getItem("user_id");
+
+if (!USER_ID) {
+  USER_ID = crypto.randomUUID();
+  localStorage.setItem("user_id", USER_ID);
+}
+
+/* ENTER vs SHIFT+ENTER */
+function handleKey(e) {
+  if (e.key === "Enter" && !e.shiftKey) {
+    e.preventDefault();
+    sendMessage();
+  }
+}
+
+/* AUTO RESIZE */
+function autoResize(el) {
+  el.style.height = "auto";
+  el.style.height = el.scrollHeight + "px";
+}
+
+/* ADD MESSAGE */
+function addMessage(text, type) {
+  const div = document.createElement("div");
+  div.className = "msg " + type;
+  div.innerHTML = text;
+  chat.appendChild(div);
+  chat.scrollTop = chat.scrollHeight;
+}
+
+/* SEND MESSAGE */
+async function sendMessage() {
+  const text = input.value.trim();
+  if (!text) return;
+
+  const welcome = document.getElementById("welcomeMsg");
+  if (welcome) welcome.remove();
+
+  addMessage(text, "user");
+
+  input.value = "";
+  input.style.height = "auto";
+
+  const res = await fetch("/chat", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      message: text,
+      user_id: USER_ID
+    })
+  });
+
+  const data = await res.json();
+
+  /**
+   * 🟡 If backend sends Gmail connect link,
+   * open OAuth in new tab automatically
+   */
+  function addBotMessage(text) {
+  const div = document.createElement("div");
+  div.className = "msg bot";
+
+  // convert OAuth link into clickable link
+  const html = text.replace(
+    /(\/auth\/google\?user_id=[^\s]+)/g,
+    // `<a href="$1" target="_blank" style="color:#19c37d">Connect Gmail</a>`
+    `<a href="javascript:void(0);" 
+       onclick="window.open('$1','gmailAuth','width=500,height=600');"
+       style="color:#19c37d;font-weight:bold;">
+       👉 Connect Gmail
+     </a>`
+
+  );
+
+  // 🔴 Convert Disconnect Gmail link
+  text = text.replace(
+    /(\/auth\/logout\?user_id=[^\s]+)/g,
+    `<a href="javascript:void(0);" 
+       onclick="window.open('$1','gmailLogout','width=400,height=500');"
+       style="color:#ff4d4d;font-weight:bold;">
+       🔴 Disconnect Gmail
+     </a>`
+  );
+
+  div.innerHTML = html;
+  chat.appendChild(div);
+  chat.scrollTop = chat.scrollHeight;
+}
+
+
+  addMessage(data.response);
+}
+</script>
+
+</body>
+</html> -->
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Agent Bot</title>
+
+<style>
+body {
+  font-family: Arial, sans-serif;
+  background: #000;
+  color: white;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+.header {
+  text-align: center;
+  padding: 12px;
+  font-size: 18px;
+  border-bottom: 1px solid #222;
+}
+#chat {
+  flex: 1;
+  padding: 20px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+.msg {
+  margin-bottom: 12px;
+  padding: 10px;
+  border-radius: 8px;
+  max-width: 70%;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+.user {
+  background: #4e4e4f;
+  margin-left: auto;
+}
+.bot {
+  background: #444654;
+  margin-right: auto;
+}
+.welcome {
+  margin: auto;
+  color: #aaa;
+  font-size: 16px;
+  text-align: center;
+}
+#inputBox {
+  display: flex;
+  padding: 12px;
+  background: #111;
+  border-top: 1px solid #222;
+}
+textarea {
+  flex: 1;
+  padding: 10px;
+  border-radius: 6px;
+  border: none;
+  outline: none;
+  resize: none;
+  background: #000;
+  color: white;
+  font-size: 14px;
+  max-height: 150px;
+  overflow-y: auto;
+}
+button {
+  margin-left: 10px;
+  padding: 10px 16px;
+  border: none;
+  border-radius: 6px;
+  background: #19c37d;
+  color: black;
+  font-size: 18px;
+  cursor: pointer;
+}
+</style>
+</head>
+
+<body>
+
+<div class="header">AgentChatBot</div>
+
+<div id="chat">
+  <div class="welcome" id="welcomeMsg">
+    👋 How can I assist you today?
+  </div>
+</div>
+
+<div id="inputBox">
+  <textarea
+    id="message"
+    rows="1"
+    placeholder="Type a message..."
+    onkeydown="handleKey(event)"
+    oninput="autoResize(this)"
+  ></textarea>
+  <button onclick="sendMessage()">↑</button>
+</div>
+
+<script>
+
+/* ============================= */
+/* 🔐 USER + SESSION IDs */
+/* ============================= */
+
+let USER_ID = localStorage.getItem("user_id");
+if (!USER_ID) {
+  USER_ID = crypto.randomUUID();
+  localStorage.setItem("user_id", USER_ID);
+}
+
+let SESSION_ID = localStorage.getItem("session_id");
+if (!SESSION_ID) {
+  SESSION_ID = crypto.randomUUID();
+  localStorage.setItem("session_id", SESSION_ID);
+}
+
+/* ============================= */
+/* 🔥 Gmail Connected Listener */
+/* ============================= */
+
+window.addEventListener("message", async function (event) {
+
+  if (event.data === "gmail_connected") {
+
+    const welcome = document.getElementById("welcomeMsg");
+    if (welcome) welcome.remove();
+
+    const res = await fetch("/chat", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        message: "system: gmail connected successfully",
+        user_id: USER_ID,
+        session_id: SESSION_ID   // ✅ FIXED
+      })
+    });
+
+    const data = await res.json();
+    addMessage(data.response, "bot");
+  }
+
+  if (event.data === "gmail_disconnected") {
+
+    addMessage("⚠️ Gmail disconnected successfully.", "bot");
+
+    addMessage(`
+      👉 <a href="javascript:void(0);" 
+         onclick="window.open('/auth/google?user_id=${USER_ID}',
+         'gmailAuth','width=500,height=600');"
+         style="color:#19c37d;font-weight:bold;">
+         Connect Gmail
+       </a>
+    `, "bot");
+  }
+
+});
+
+/* ============================= */
+
+const chat = document.getElementById("chat");
+const input = document.getElementById("message");
+
+function handleKey(e) {
+  if (e.key === "Enter" && !e.shiftKey) {
+    e.preventDefault();
+    sendMessage();
+  }
+}
+
+function autoResize(el) {
+  el.style.height = "auto";
+  el.style.height = el.scrollHeight + "px";
+}
+
+function addMessage(text, type) {
+  const div = document.createElement("div");
+  div.className = "msg " + type;
+  div.innerHTML = text;
+  chat.appendChild(div);
+  chat.scrollTop = chat.scrollHeight;
+}
+
+/* ============================= */
+/* 🚀 SEND MESSAGE */
+/* ============================= */
+
+async function sendMessage() {
+
+  const text = input.value.trim();
+  if (!text) return;
+
+  const welcome = document.getElementById("welcomeMsg");
+  if (welcome) welcome.remove();
+
+  addMessage(text, "user");
+
+  input.value = "";
+  input.style.height = "auto";
+
+  const res = await fetch("/chat", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      message: text,
+      user_id: USER_ID,
+      session_id: SESSION_ID   // ✅ FIXED
+    })
+  });
+
+  const data = await res.json();
+  addMessage(data.response, "bot");
+}
+
+</script>
+
+</body>
+</html>
