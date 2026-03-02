@@ -593,13 +593,18 @@ load_dotenv()
 # --------------------------------------------------
 app = FastAPI(title="Agentic Multi-User Gmail Bot")
 templates = Jinja2Templates(directory="templates")
+from langchain_community.chat_models import BedrockChat
 
-
-
-llm = ChatGoogleGenerativeAI(
-    model="gemini-flash-latest",
-    temperature=0
+llm = BedrockChat(
+    model_id="anthropic.claude-v2",
+    region_name="us-east-1"
 )
+
+
+# llm = ChatGoogleGenerativeAI(
+#     model="gemini-flash-latest",
+#     temperature=0
+# )
 
 search_tool = DuckDuckGoSearchAPIWrapper()
 # MCP_URL = "http://mcp:3333/mcp"
@@ -1118,4 +1123,5 @@ async def chat(req: ChatRequest):
         return JSONResponse(
             status_code=500,
             content={"error": str(e)}
+
         )
