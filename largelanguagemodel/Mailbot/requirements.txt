@@ -15,15 +15,15 @@ ddgs
 mcp
 sqlalchemy
 psycopg2-binary
-fastmcp
-boto
+
+
 boto3
 botocore 
 langchain-aws
-bedrock
 google-api-python-client
 google-auth
 google-auth-oauthlib
+
 
 
 
