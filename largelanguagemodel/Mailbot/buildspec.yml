@@ -1,21 +1,15 @@
 version: 0.2
 
 phases:
+  pre_build:
+    commands:
+      - aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 428056470896.dkr.ecr.us-east-1.amazonaws.com
 
-pre_build:
-commands:
-- echo Logging in to Amazon ECR
-- aws ecr get-login-password --region ap-south-1 | docker login --username AWS --password-stdin $REPOSITORY_URI
+  build:
+    commands:
+      - docker build -t mailbotecr .
+      - docker tag mailbotecr:latest 428056470896.dkr.ecr.us-east-1.amazonaws.com/mailbotecr:latest
 
-build:
-commands:
-- echo Moving to Mailbot folder
-- cd largelanguagemodel/Mailbot
-- echo Building Docker image
-- docker build -t mailbot .
-- docker tag mailbot:latest $REPOSITORY_URI:latest
-
-post_build:
-commands:
-- echo Pushing image to ECR
-- docker push $REPOSITORY_URI:latest
+  post_build:
+    commands:
+      - docker push 428056470896.dkr.ecr.us-east-1.amazonaws.com/mailbotecr:latest
