@@ -599,7 +599,9 @@ llm = BedrockChat(
     model_id="anthropic.claude-v2",
     region_name="us-east-1"
 )
+import boto3
 
+bedrock = boto3.client("bedrock-runtime", region_name="us-east-1")
 
 # llm = ChatGoogleGenerativeAI(
 #     model="gemini-flash-latest",
@@ -1125,3 +1127,4 @@ async def chat(req: ChatRequest):
             content={"error": str(e)}
 
         )
+
