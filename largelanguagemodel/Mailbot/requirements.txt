@@ -16,13 +16,14 @@ mcp
 sqlalchemy
 psycopg2-binary
 
-
+aiobotocore
 boto3
-botocore 
+botocore==1.34.69
 langchain-aws
 google-api-python-client
 google-auth
 google-auth-oauthlib
+
 
 
 
