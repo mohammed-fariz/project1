@@ -1,0 +1,20 @@
+version: 0.2
+
+phases:
+  pre_build:
+    commands:
+      - echo Logging in to Amazon ECR
+      - aws --version
+      - $(aws ecr get-login --no-include-email --region $AWS_DEFAULT_REGION)
+
+  build:
+    commands:
+      - echo Build backend image
+      - docker build -t backend ./backend
+
+      - echo Build mcp_server image
+      - docker build -t mcp_server ./mcp_server
+
+  post_build:
+    commands:
+      - echo Build completed
