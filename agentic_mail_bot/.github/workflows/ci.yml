@@ -24,15 +24,6 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Setup Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: "3.10"
-
-      - name: Install dependencies
-        run: pip install -r agentic_mail_bot/backend/requirements.txt
-        run : pip install -r agentic_mail_bot/mcp_server/requirements.txt
-
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v3
         with:
