@@ -63,3 +63,4 @@ jobs:
 
       - name: Push MCP server image
         run: docker push $MCP_REPO:latest
+        run: docker push $MCP_REPO:latest
