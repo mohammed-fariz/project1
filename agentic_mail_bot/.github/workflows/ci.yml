@@ -20,6 +20,11 @@ jobs:
       MCP_REPO: 428056470896.dkr.ecr.us-east-1.amazonaws.com/mcp_server
 
     steps:
+      - name: Install pytest
+        run: pip install pytest
+
+      - name: Run tests
+        run: pytest
 
       - name: Checkout repository
         uses: actions/checkout@v3
