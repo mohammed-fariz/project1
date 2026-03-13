@@ -36,10 +36,21 @@ templates = Jinja2Templates(directory="templates")
 
 
 
-llm = ChatGoogleGenerativeAI(
-    model="gemini-flash-latest",
-    temperature=0
+# llm = ChatGoogleGenerativeAI(
+#     model="gemini-flash-latest",
+#     temperature=0
+# )
+from langchain_community.chat_models import BedrockChat
+
+llm = BedrockChat(
+    model_id="anthropic.claude-v2",
+    region_name="us-east-1"
 )
+import boto3
+
+bedrock = boto3.client("bedrock-runtime", region_name="us-east-1")
+
+
 
 search_tool = DuckDuckGoSearchAPIWrapper()
 MCP_URL = "http://mcp:3333/mcp"
