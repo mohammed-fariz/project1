@@ -1,5 +1,5 @@
 from fastapi.testclient import TestClient
-from backend.app import app
+from agentic_mail_bot.backend.app import app
 
 client = TestClient(app)
 
