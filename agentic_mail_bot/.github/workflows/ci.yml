@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - feature-ci-new
+      - main
   pull_request:
     branches:
       - main
@@ -14,43 +15,35 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
+      AWS_REGION: us-east-1
       BACKEND_REPO: 428056470896.dkr.ecr.us-east-1.amazonaws.com/backend
       MCP_REPO: 428056470896.dkr.ecr.us-east-1.amazonaws.com/mcp_server
 
     steps:
-
-      - name: Checkout repository
-        uses: actions/checkout@v3
-
-      - name: Setup Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.10'
-
-      - name: Install dependencies
-        run: pip install -r backend/requirements.txt
-
       - name: Install pytest
         run: pip install pytest
 
       - name: Run tests
         run: pytest
 
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v3
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ secrets.AWS_REGION }}
+          aws-region: ${{ env.AWS_REGION }}
 
       - name: Login to Amazon ECR
         uses: aws-actions/amazon-ecr-login@v2
 
       - name: Build backend image
-        run: docker build -t backend ./backend
+        run: docker build -t backend ./agentic_mail_bot/backend
 
       - name: Build MCP server image
-        run: docker build -t mcp_server ./mcp_server
+        run: docker build -t mcp_server ./agentic_mail_bot/mcp_server
 
       - name: Tag backend image
         run: docker tag backend:latest $BACKEND_REPO:latest
