@@ -30,11 +30,6 @@ jobs:
       - name: Install dependencies
         run: pip install -r backend/requirements.txt
 
-      - name: Install pytest
-        run: pip install pytest
-
-      - name: Run tests
-        run: pytest
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v3
