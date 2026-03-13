@@ -52,7 +52,7 @@ jobs:
       - name: Build MCP server image
         run: docker build -t mcp_server ./mcp_server
 
-      - name: Tag backend image 
+      - name: Tag backend image
         run: docker tag backend:latest $BACKEND_REPO:latest
 
       - name: Tag MCP server image
