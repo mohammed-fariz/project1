@@ -32,7 +32,7 @@ load_dotenv()
 # APP
 # --------------------------------------------------
 app = FastAPI(title="Agentic Multi-User Gmail Bot")
-templates = Jinja2Templates(directory="agentic_mail_bot/templates")
+templates = Jinja2Templates(directory="agentic_mail_bot/backend/templates")
 
 
 # llm = ChatGoogleGenerativeAI(
