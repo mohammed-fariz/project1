@@ -1,10 +1,12 @@
+
+
+
+
+
+
 import pytest
 from fastapi.testclient import TestClient
-<<<<<<< HEAD
 from backend.app import app, detect_intent
-=======
-from backend.app import app,detect_intent
->>>>>>> f499bb2849f116abc79652cb9378e49ed4d30d7e
 
 client = TestClient(app)
 
@@ -31,7 +33,6 @@ def test_chat_endpoint():
             "session_id": "session1"
         }
     )
-    
 
     assert response.status_code == 200
     assert "response" in response.json()
