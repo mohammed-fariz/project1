@@ -27,6 +27,7 @@ def test_chat_endpoint():
             "session_id": "session1"
         }
     )
+    
 
     assert response.status_code == 200
     assert "response" in response.json()
