@@ -16,3 +16,4 @@ mcp
 sqlalchemy
 psycopg2-binary
 pytest
+boto3   
