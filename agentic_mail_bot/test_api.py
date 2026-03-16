@@ -1,9 +1,3 @@
-
-
-
-
-
-
 import pytest
 from fastapi.testclient import TestClient
 from backend.app import app, detect_intent
@@ -28,12 +22,14 @@ def test_chat_endpoint():
     response = client.post(
         "/chat",
         json={
-            "message": "hello",
+            "message": "add 2 and 3",
             "user_id": "test_user",
             "session_id": "session1"
         }
     )
 
     assert response.status_code == 200
-    assert "response" in response.json()
-    
+
+    data = response.json()
+
+    assert "response" in data
