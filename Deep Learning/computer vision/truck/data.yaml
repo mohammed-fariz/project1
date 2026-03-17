@@ -20,10 +20,21 @@
 
 # names:
 #   0: truck_bed
-path: /content/drive/MyDrive/truck
+
+
+# path:Deep Learning/computer vision/truck
+
+# train: train/images
+# val: val/images
+
+# names:
+#   0: truck_bed
+
+path: dataset_split
 
 train: train/images
-val: val/images
+val: valid/images
+test: test/images
 
-names:
-  0: truck_bed
+nc: 1
+names: ['truck_bed']
