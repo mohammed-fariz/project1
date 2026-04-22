@@ -1,0 +1,176 @@
+{
+  "session_id": "inc_8528a12a",
+  "mode": "new_only",
+  "classes": [
+    "# 89 GRANITE",
+    "# 89 LIMESTONE",
+    "0.5 in GRANITE",
+    "NATURAL SAND"
+  ],
+  "old_classes": [
+    "# 89 GRANITE",
+    "# 89 LIMESTONE",
+    "0.5 in GRANITE"
+  ],
+  "truly_new_classes": [
+    "NATURAL SAND"
+  ],
+  "weak_existing_classes": [],
+  "best_epoch": 10,
+  "best_val_acc": 1.0,
+  "cm_data": [
+    [
+      6,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      6,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      6,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      6
+    ]
+  ],
+  "per_class_recall": {
+    "# 89 GRANITE": 1.0,
+    "# 89 LIMESTONE": 1.0,
+    "0.5 in GRANITE": 1.0,
+    "NATURAL SAND": 1.0
+  },
+  "confusion_pairs": {},
+  "hyperparams": {
+    "batch_size": 16,
+    "lr": 5e-05,
+    "epochs": 15,
+    "patience": 5,
+    "weight_decay": 0.0001,
+    "freeze_backbone": false,
+    "backbone_lr_multiplier": 0.1,
+    "label_smoothing": 0.0,
+    "n_train": 89,
+    "n_classes": 4,
+    "is_incremental": true
+  },
+  "history": {
+    "train_loss": [
+      1.4581,
+      1.2715,
+      1.4234,
+      1.2836,
+      1.2015,
+      1.1262,
+      1.115,
+      1.1323,
+      1.0063,
+      1.026,
+      0.9908,
+      0.9571,
+      1.0011,
+      1.0582,
+      1.0608
+    ],
+    "train_acc": [
+      0.5393,
+      0.618,
+      0.5281,
+      0.618,
+      0.7753,
+      0.8876,
+      0.8202,
+      0.8315,
+      0.8989,
+      0.8539,
+      0.8427,
+      0.8315,
+      0.7753,
+      0.7865,
+      0.7753
+    ],
+    "val_loss": [
+      0.9711,
+      0.9079,
+      0.8667,
+      0.8426,
+      0.8101,
+      0.7483,
+      0.7241,
+      0.691,
+      0.6539,
+      0.6258,
+      0.6141,
+      0.5889,
+      0.5919,
+      0.5901,
+      0.6008
+    ],
+    "val_acc": [
+      0.7083,
+      0.7917,
+      0.8333,
+      0.8333,
+      0.9167,
+      0.9583,
+      0.9167,
+      0.9583,
+      0.9583,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0
+    ],
+    "lwf_loss": [
+      0.2851,
+      0.2135,
+      0.3134,
+      0.233,
+      0.2762,
+      0.2731,
+      0.2505,
+      0.2429,
+      0.222,
+      0.2108,
+      0.18,
+      0.1893,
+      0.2094,
+      0.2178,
+      0.2401
+    ],
+    "hard_mining_active": [
+      false,
+      false,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true
+    ]
+  },
+  "checkpoint_path": "C:\\Users\\T074\\git clone\\project\\Deep Learning\\YOLO\\resnet18_project\\models\\checkpoints\\inc_8528a12a_best.pth",
+  "cm_path": "C:\\Users\\T074\\git clone\\project\\Deep Learning\\YOLO\\resnet18_project\\results\\confusion_matrices\\inc_8528a12a_cm.png",
+  "model_type": "incremental",
+  "lwf_weight": 1.0,
+  "hard_mining_warmup": 2
+}

@@ -1,0 +1,186 @@
+{
+  "session_id": "inc_2fb54601",
+  "mode": "retrain_only",
+  "classes": [
+    "# 89 GRANITE",
+    "# 89 LIMESTONE",
+    "0.5 in GRANITE",
+    "0.75 in LIMESTONE",
+    "1.5 in LIMESTONE",
+    "NATURAL SAND",
+    "SCREENINGS"
+  ],
+  "old_classes": [
+    "# 89 GRANITE",
+    "# 89 LIMESTONE",
+    "0.5 in GRANITE",
+    "0.75 in LIMESTONE",
+    "1.5 in LIMESTONE",
+    "NATURAL SAND",
+    "SCREENINGS"
+  ],
+  "truly_new_classes": [],
+  "weak_existing_classes": [
+    "0.75 in LIMESTONE",
+    "1.5 in LIMESTONE",
+    "SCREENINGS"
+  ],
+  "best_epoch": 1,
+  "best_val_acc": 0.6744186046511628,
+  "cm_data": [
+    [
+      6,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      6,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      6,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      4,
+      2,
+      0,
+      1,
+      0,
+      0
+    ],
+    [
+      0,
+      3,
+      0,
+      0,
+      1,
+      0,
+      1
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      6,
+      0
+    ],
+    [
+      1,
+      0,
+      0,
+      0,
+      0,
+      2,
+      4
+    ]
+  ],
+  "per_class_recall": {
+    "# 89 GRANITE": 1.0,
+    "# 89 LIMESTONE": 1.0,
+    "0.5 in GRANITE": 1.0,
+    "0.75 in LIMESTONE": 0.0,
+    "1.5 in LIMESTONE": 0.2,
+    "NATURAL SAND": 1.0,
+    "SCREENINGS": 0.5714
+  },
+  "confusion_pairs": {
+    "0.75 in LIMESTONE": {
+      "confused_with": "# 89 LIMESTONE",
+      "confusion_rate": 0.5714
+    },
+    "1.5 in LIMESTONE": {
+      "confused_with": "# 89 LIMESTONE",
+      "confusion_rate": 0.6
+    },
+    "SCREENINGS": {
+      "confused_with": "NATURAL SAND",
+      "confusion_rate": 0.2857
+    }
+  },
+  "hyperparams": {
+    "batch_size": 32,
+    "lr": 5e-05,
+    "epochs": 15,
+    "patience": 5,
+    "weight_decay": 0.0001,
+    "freeze_backbone": false,
+    "backbone_lr_multiplier": 0.1,
+    "label_smoothing": 0.0,
+    "n_train": 159,
+    "n_classes": 7,
+    "is_incremental": true
+  },
+  "history": {
+    "train_loss": [
+      1.1536,
+      0.9482,
+      0.6901,
+      0.6021,
+      0.5834,
+      0.5705
+    ],
+    "train_acc": [
+      0.6981,
+      0.6415,
+      0.5094,
+      0.478,
+      0.3774,
+      0.3333
+    ],
+    "val_loss": [
+      1.2106,
+      1.1927,
+      1.1825,
+      1.1752,
+      1.1654,
+      1.1561
+    ],
+    "val_acc": [
+      0.6744,
+      0.6279,
+      0.5581,
+      0.5581,
+      0.5581,
+      0.5581
+    ],
+    "lwf_loss": [
+      -0.1004,
+      -0.3189,
+      -0.6771,
+      -0.8412,
+      -1.037,
+      -1.1144
+    ],
+    "hard_mining_active": [
+      false,
+      false,
+      true,
+      true,
+      true,
+      true
+    ]
+  },
+  "checkpoint_path": "C:\\Users\\T074\\git clone\\project\\Deep Learning\\YOLO\\resnet18_project\\models\\checkpoints\\inc_2fb54601_best.pth",
+  "cm_path": "C:\\Users\\T074\\git clone\\project\\Deep Learning\\YOLO\\resnet18_project\\results\\confusion_matrices\\inc_2fb54601_cm.png",
+  "model_type": "incremental",
+  "lwf_weight": 1.0,
+  "hard_mining_warmup": 2
+}
