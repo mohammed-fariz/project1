@@ -1,0 +1,94 @@
+{
+  "sessions": [
+    {
+      "session_id": "d8ad5413",
+      "classes": [
+        "# 89 GRANITE",
+        "# 89 LIMESTONE",
+        "0.5 in GRANITE"
+      ],
+      "best_val_acc": 1.0,
+      "checkpoint_path": "C:\\Users\\T074\\git clone\\project\\Deep Learning\\YOLO\\resnet18_project\\models\\checkpoints\\d8ad5413_best.pth",
+      "model_type": "initial",
+      "num_classes": 3
+    },
+    {
+      "session_id": "inc_8528a12a",
+      "classes": [
+        "# 89 GRANITE",
+        "# 89 LIMESTONE",
+        "0.5 in GRANITE",
+        "NATURAL SAND"
+      ],
+      "best_val_acc": 1.0,
+      "checkpoint_path": "C:\\Users\\T074\\git clone\\project\\Deep Learning\\YOLO\\resnet18_project\\models\\checkpoints\\inc_8528a12a_best.pth",
+      "model_type": "incremental",
+      "num_classes": 4
+    },
+    {
+      "session_id": "inc_e02bc434",
+      "classes": [
+        "# 89 GRANITE",
+        "# 89 LIMESTONE",
+        "0.5 in GRANITE",
+        "0.75 in LIMESTONE",
+        "1.5 in LIMESTONE",
+        "NATURAL SAND",
+        "SCREENINGS"
+      ],
+      "best_val_acc": 0.7674418604651163,
+      "checkpoint_path": "C:\\Users\\T074\\git clone\\project\\Deep Learning\\YOLO\\resnet18_project\\models\\checkpoints\\inc_e02bc434_best.pth",
+      "model_type": "incremental",
+      "num_classes": 7
+    },
+    {
+      "session_id": "inc_92572320",
+      "classes": [
+        "# 89 GRANITE",
+        "# 89 LIMESTONE",
+        "0.5 in GRANITE",
+        "0.75 in LIMESTONE",
+        "1.5 in LIMESTONE",
+        "NATURAL SAND",
+        "SCREENINGS"
+      ],
+      "best_val_acc": 0.6046511627906976,
+      "checkpoint_path": "C:\\Users\\T074\\git clone\\project\\Deep Learning\\YOLO\\resnet18_project\\models\\checkpoints\\inc_92572320_best.pth",
+      "model_type": "incremental",
+      "num_classes": 7
+    },
+    {
+      "session_id": "inc_2fb54601",
+      "classes": [
+        "# 89 GRANITE",
+        "# 89 LIMESTONE",
+        "0.5 in GRANITE",
+        "0.75 in LIMESTONE",
+        "1.5 in LIMESTONE",
+        "NATURAL SAND",
+        "SCREENINGS"
+      ],
+      "best_val_acc": 0.6744186046511628,
+      "checkpoint_path": "C:\\Users\\T074\\git clone\\project\\Deep Learning\\YOLO\\resnet18_project\\models\\checkpoints\\inc_2fb54601_best.pth",
+      "model_type": "incremental",
+      "num_classes": 7
+    },
+    {
+      "session_id": "inc_b840cf88",
+      "classes": [
+        "# 89 GRANITE",
+        "# 89 LIMESTONE",
+        "0.5 in GRANITE",
+        "0.75 in LIMESTONE",
+        "1.5 in LIMESTONE",
+        "NATURAL SAND",
+        "SCREENINGS"
+      ],
+      "best_val_acc": 0.6046511627906976,
+      "checkpoint_path": "C:\\Users\\T074\\git clone\\project\\Deep Learning\\YOLO\\resnet18_project\\models\\checkpoints\\inc_b840cf88_best.pth",
+      "model_type": "incremental",
+      "num_classes": 7
+    }
+  ],
+  "latest": "inc_b840cf88"
+}
