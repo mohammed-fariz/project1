@@ -1,0 +1,804 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Failure Prediction Model</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0b0e14;
+    --bg-panel: #111620;
+    --bg-card: #161c28;
+    --bg-input: #1a2133;
+    --border: rgba(255,255,255,0.07);
+    --border-accent: rgba(255,255,255,0.14);
+    --text-primary: #e8edf5;
+    --text-secondary: #7a8ba8;
+    --text-muted: #3d4f69;
+    --accent: #3b82f6;
+    --accent-glow: rgba(59,130,246,0.18);
+    --green: #22c55e;
+    --green-bg: rgba(34,197,94,0.10);
+    --red: #ef4444;
+    --red-bg: rgba(239,68,68,0.10);
+    --amber: #f59e0b;
+    --amber-bg: rgba(245,158,11,0.10);
+    --mono: 'IBM Plex Mono', monospace;
+    --sans: 'IBM Plex Sans', sans-serif;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text-primary);
+    font-family: var(--sans);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── HEADER ── */
+  header {
+    border-bottom: 1px solid var(--border);
+    padding: 0 2rem;
+    height: 64px;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(11,14,20,0.92);
+    backdrop-filter: blur(12px);
+  }
+
+  .header-icon {
+    width: 32px; height: 32px;
+    background: var(--accent);
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .header-icon svg { width: 18px; height: 18px; fill: white; }
+
+  header h1 {
+    font-family: var(--sans);
+    font-size: 17px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    color: var(--text-primary);
+  }
+
+  header .sub {
+    font-size: 12px;
+    color: var(--text-muted);
+    font-family: var(--mono);
+    margin-left: auto;
+    letter-spacing: 0.04em;
+  }
+
+  .status-dot {
+    width: 7px; height: 7px; border-radius: 50%;
+    background: var(--green);
+    box-shadow: 0 0 8px var(--green);
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+  /* ── MAIN LAYOUT ── */
+  main {
+    max-width: 1440px;
+    margin: 0 auto;
+    padding: 2rem 2rem 4rem;
+  }
+
+  /* ── UPLOAD ZONE ── */
+  .upload-section {
+    margin-bottom: 2rem;
+  }
+
+  .upload-zone {
+    border: 1.5px dashed var(--border-accent);
+    border-radius: 14px;
+    background: var(--bg-panel);
+    padding: 2.5rem;
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s;
+    position: relative;
+  }
+
+  .upload-zone:hover, .upload-zone.drag-over {
+    border-color: var(--accent);
+    background: color-mix(in srgb, var(--bg-panel) 90%, var(--accent));
+  }
+
+  .upload-zone input[type="file"] {
+    position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%;
+  }
+
+  .upload-icon-wrap {
+    width: 64px; height: 64px; flex-shrink: 0;
+    border-radius: 16px;
+    background: var(--accent-glow);
+    border: 1px solid rgba(59,130,246,0.25);
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  .upload-icon-wrap svg { width: 28px; height: 28px; stroke: var(--accent); fill: none; }
+
+  .upload-text h3 { font-size: 15px; font-weight: 500; color: var(--text-primary); margin-bottom: 4px; }
+  .upload-text p { font-size: 13px; color: var(--text-secondary); }
+  .upload-text .json-badge {
+    display: inline-block; margin-top: 8px;
+    background: var(--accent-glow);
+    color: var(--accent);
+    border: 1px solid rgba(59,130,246,0.3);
+    border-radius: 6px;
+    font-family: var(--mono);
+    font-size: 11px;
+    padding: 2px 8px;
+    letter-spacing: 0.05em;
+  }
+
+  .file-info {
+    margin-left: auto;
+    text-align: right;
+    flex-shrink: 0;
+  }
+
+  .file-info .filename {
+    font-family: var(--mono);
+    font-size: 13px;
+    color: var(--accent);
+    max-width: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .file-info .filesize {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 3px;
+  }
+
+  /* ── ANALYZE BUTTON ── */
+  .controls {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    margin-top: 1rem;
+  }
+
+  .btn-analyze {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--accent);
+    color: white;
+    border: none;
+    border-radius: 9px;
+    padding: 11px 24px;
+    font-family: var(--sans);
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: opacity 0.2s, transform 0.1s;
+    letter-spacing: 0.01em;
+  }
+
+  .btn-analyze:hover:not(:disabled) { opacity: 0.88; }
+  .btn-analyze:active:not(:disabled) { transform: scale(0.98); }
+  .btn-analyze:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  .btn-analyze svg { width: 16px; height: 16px; stroke: white; fill: none; }
+
+  .btn-clear {
+    background: transparent;
+    color: var(--text-secondary);
+    border: 1px solid var(--border-accent);
+    border-radius: 9px;
+    padding: 11px 18px;
+    font-family: var(--sans);
+    font-size: 13px;
+    cursor: pointer;
+    transition: color 0.2s, border-color 0.2s;
+  }
+  .btn-clear:hover { color: var(--text-primary); border-color: var(--text-secondary); }
+
+  .counter-badge {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 8px 14px;
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--text-secondary);
+  }
+
+  /* ── PROGRESS BAR ── */
+  .progress-wrap {
+    height: 3px;
+    background: var(--border);
+    border-radius: 2px;
+    overflow: hidden;
+    margin-top: 1rem;
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  .progress-wrap.visible { opacity: 1; }
+  .progress-bar {
+    height: 100%;
+    background: var(--accent);
+    width: 0%;
+    border-radius: 2px;
+    transition: width 0.4s ease;
+  }
+  .progress-bar.indeterminate {
+    width: 40%;
+    animation: slide 1.2s ease-in-out infinite;
+  }
+  @keyframes slide { 0%{margin-left:-40%} 100%{margin-left:100%} }
+
+  /* ── RESULTS ── */
+  #results { display: none; }
+
+  .summary-bar {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+  }
+
+  .stat-chip {
+    background: var(--bg-panel);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 10px 18px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .stat-chip .val {
+    font-family: var(--mono);
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+
+  .stat-chip .lbl {
+    font-size: 11px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    line-height: 1.3;
+  }
+
+  /* ── CARD GRID ── */
+  .cards-container { display: flex; flex-direction: column; gap: 1.5rem; }
+
+  .result-card {
+    background: var(--bg-panel);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+    transition: border-color 0.2s;
+  }
+
+  .result-card:hover { border-color: var(--border-accent); }
+
+  .card-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 20px;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg-card);
+  }
+
+  .card-index {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text-muted);
+    background: var(--bg-input);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 3px 8px;
+  }
+
+  .risk-badge {
+    padding: 4px 12px;
+    border-radius: 6px;
+    font-family: var(--mono);
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+  }
+
+  .risk-low { background: var(--green-bg); color: var(--green); border: 1px solid rgba(34,197,94,0.25); }
+  .risk-medium { background: var(--amber-bg); color: var(--amber); border: 1px solid rgba(245,158,11,0.25); }
+  .risk-high { background: var(--red-bg); color: var(--red); border: 1px solid rgba(239,68,68,0.25); }
+
+  .status-chip {
+    margin-left: auto;
+    padding: 4px 12px;
+    border-radius: 6px;
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.05em;
+  }
+
+  .status-safe { background: var(--green-bg); color: var(--green); border: 1px solid rgba(34,197,94,0.2); }
+  .status-unsafe { background: var(--red-bg); color: var(--red); border: 1px solid rgba(239,68,68,0.2); }
+
+  /* ── SPLIT PANELS ── */
+  .card-body {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0;
+  }
+
+  @media (max-width: 768px) {
+    .card-body { grid-template-columns: 1fr; }
+    .card-right { border-top: 1px solid var(--border); border-left: none !important; }
+  }
+
+  .card-left, .card-right {
+    padding: 1.25rem 1.5rem;
+  }
+
+  .card-right {
+    border-left: 1px solid var(--border);
+    background: color-mix(in srgb, var(--bg-panel) 96%, var(--accent));
+  }
+
+  .panel-label {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .panel-label::before {
+    content: '';
+    display: inline-block;
+    width: 3px; height: 12px;
+    border-radius: 2px;
+    background: var(--text-muted);
+  }
+
+  .card-right .panel-label::before { background: var(--accent); }
+
+  /* ── JSON TABLE ── */
+  .json-table { width: 100%; border-collapse: collapse; }
+
+  .json-table tr:not(:last-child) td { border-bottom: 1px solid rgba(255,255,255,0.04); }
+
+  .json-table td {
+    padding: 6px 0;
+    font-size: 12.5px;
+    vertical-align: top;
+  }
+
+  .json-table .jkey {
+    color: var(--text-secondary);
+    font-family: var(--mono);
+    padding-right: 12px;
+    white-space: nowrap;
+    width: 40%;
+    font-size: 11.5px;
+  }
+
+  .json-table .jval {
+    color: var(--text-primary);
+    font-family: var(--mono);
+    font-size: 12px;
+    word-break: break-word;
+  }
+
+  .jval.num { color: #93c5fd; }
+  .jval.str { color: #86efac; }
+  .jval.bool { color: #fbbf24; }
+
+  /* ── RISK SCORE BAR ── */
+  .risk-score-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .score-num {
+    font-family: var(--mono);
+    font-size: 28px;
+    font-weight: 600;
+    min-width: 60px;
+  }
+
+  .score-bar-wrap { flex: 1; }
+
+  .score-bar-track {
+    height: 6px;
+    background: var(--bg-input);
+    border-radius: 3px;
+    overflow: hidden;
+    margin-bottom: 4px;
+  }
+
+  .score-bar-fill {
+    height: 100%;
+    border-radius: 3px;
+    transition: width 0.8s cubic-bezier(0.4,0,0.2,1);
+  }
+
+  .score-bar-label {
+    font-size: 10px;
+    color: var(--text-muted);
+    font-family: var(--mono);
+  }
+
+  /* ── FAILURE TYPE TAG ── */
+  .failure-type {
+    display: inline-block;
+    background: rgba(239,68,68,0.08);
+    color: #fca5a5;
+    border: 1px solid rgba(239,68,68,0.18);
+    border-radius: 6px;
+    font-family: var(--mono);
+    font-size: 11px;
+    padding: 3px 10px;
+    margin-bottom: 10px;
+  }
+
+  /* ── ERROR STATE ── */
+  .error-card {
+    background: var(--red-bg);
+    border: 1px solid rgba(239,68,68,0.2);
+    border-radius: 10px;
+    padding: 14px 18px;
+    font-size: 13px;
+    color: #fca5a5;
+    font-family: var(--mono);
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+  }
+
+  /* ── EMPTY / LOADING STATES ── */
+  .empty-state {
+    text-align: center;
+    padding: 4rem 2rem;
+    color: var(--text-muted);
+  }
+
+  .empty-state svg { width: 48px; height: 48px; stroke: var(--text-muted); fill: none; margin-bottom: 16px; opacity: 0.4; }
+  .empty-state p { font-size: 14px; line-height: 1.6; }
+
+  .toast {
+    position: fixed; bottom: 2rem; right: 2rem;
+    background: var(--bg-card);
+    border: 1px solid var(--border-accent);
+    border-radius: 10px;
+    padding: 12px 18px;
+    font-size: 13px;
+    color: var(--text-primary);
+    z-index: 999;
+    transform: translateY(20px);
+    opacity: 0;
+    transition: all 0.3s;
+  }
+  .toast.show { transform: translateY(0); opacity: 1; }
+  .toast.error { border-color: rgba(239,68,68,0.4); color: #fca5a5; }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 4px; height: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border-accent); border-radius: 2px; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-icon">
+    <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+  </div>
+  <h1>Failure Prediction Model</h1>
+  <div style="display:flex;align-items:center;gap:8px;margin-left:auto;">
+    <div class="status-dot"></div>
+    <span class="sub">MEP · STRUCTURAL · AI-DRIVEN</span>
+  </div>
+</header>
+
+<main>
+
+  <!-- UPLOAD SECTION -->
+  <div class="upload-section">
+    <div class="upload-zone" id="dropZone">
+      <input type="file" id="fileInput" accept=".json" />
+      <div class="upload-icon-wrap">
+        <svg viewBox="0 0 24 24" stroke-width="1.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
+      </div>
+      <div class="upload-text">
+        <h3>Drop your JSON file here</h3>
+        <p>or click anywhere to browse files</p>
+        <span class="json-badge">.json only</span>
+      </div>
+      <div class="file-info" id="fileInfo" style="display:none;">
+        <div class="filename" id="fileName">—</div>
+        <div class="filesize" id="fileSize"></div>
+      </div>
+    </div>
+
+    <div class="controls">
+      <button class="btn-analyze" id="analyzeBtn" disabled onclick="runAnalysis()">
+        <svg viewBox="0 0 24 24" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+        Run Analysis
+      </button>
+      <button class="btn-clear" id="clearBtn" onclick="clearAll()">Clear</button>
+      <div class="counter-badge" id="counterBadge" style="display:none;">
+        <span id="counterText">0 records loaded</span>
+      </div>
+    </div>
+
+    <div class="progress-wrap" id="progressWrap">
+      <div class="progress-bar indeterminate" id="progressBar"></div>
+    </div>
+  </div>
+
+  <!-- RESULTS SECTION -->
+  <div id="results">
+    <div class="summary-bar" id="summaryBar"></div>
+    <div class="cards-container" id="cardsContainer"></div>
+  </div>
+
+  <!-- EMPTY STATE -->
+  <div id="emptyState" class="empty-state">
+    <svg viewBox="0 0 24 24" stroke-width="1.2">
+      <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
+      <polyline points="14 2 14 8 20 8"/>
+      <line x1="12" y1="18" x2="12" y2="12"/>
+      <line x1="9" y1="15" x2="15" y2="15"/>
+    </svg>
+    <p>Upload a JSON file to begin structural<br>and MEP failure risk analysis.</p>
+  </div>
+
+</main>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const API_URL = 'http://localhost:5000/predict';
+
+let selectedFile = null;
+let parsedData = null;
+
+// ── FILE HANDLING ──
+const dropZone = document.getElementById('dropZone');
+const fileInput = document.getElementById('fileInput');
+
+fileInput.addEventListener('change', e => handleFile(e.target.files[0]));
+
+dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('drag-over'); });
+dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
+dropZone.addEventListener('drop', e => {
+  e.preventDefault();
+  dropZone.classList.remove('drag-over');
+  if (e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0]);
+});
+
+function handleFile(file) {
+  if (!file || !file.name.endsWith('.json')) {
+    showToast('Only .json files are accepted.', true);
+    return;
+  }
+  selectedFile = file;
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const parsed = JSON.parse(e.target.result);
+      parsedData = Array.isArray(parsed) ? parsed : [parsed];
+      document.getElementById('fileName').textContent = file.name;
+      document.getElementById('fileSize').textContent = formatBytes(file.size) + ' · ' + parsedData.length + ' record' + (parsedData.length !== 1 ? 's' : '');
+      document.getElementById('fileInfo').style.display = 'block';
+      document.getElementById('counterBadge').style.display = 'flex';
+      document.getElementById('counterText').textContent = parsedData.length + ' record' + (parsedData.length !== 1 ? 's' : '') + ' loaded';
+      document.getElementById('analyzeBtn').disabled = false;
+      document.getElementById('emptyState').style.display = 'none';
+    } catch(err) {
+      showToast('Invalid JSON file: ' + err.message, true);
+    }
+  };
+  reader.readAsText(file);
+}
+
+// ── ANALYSIS ──
+async function runAnalysis() {
+  if (!selectedFile) return;
+
+  const btn = document.getElementById('analyzeBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<span style="display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,0.3);border-top-color:white;border-radius:50%;animation:spin 0.7s linear infinite;"></span> Analyzing…';
+
+  const progress = document.getElementById('progressWrap');
+  progress.classList.add('visible');
+
+  document.getElementById('results').style.display = 'none';
+
+  const formData = new FormData();
+  formData.append('file', selectedFile);
+
+  try {
+    const res = await fetch(API_URL, { method: 'POST', body: formData });
+    if (!res.ok) {
+      const err = await res.json();
+      throw new Error(err.error || 'Server error ' + res.status);
+    }
+    const data = await res.json();
+    renderResults(data);
+    showToast('Analysis complete — ' + data.success + ' record' + (data.success !== 1 ? 's' : '') + ' processed.');
+  } catch(err) {
+    showToast('Error: ' + err.message, true);
+    document.getElementById('emptyState').style.display = 'block';
+  } finally {
+    progress.classList.remove('visible');
+    btn.disabled = false;
+    btn.innerHTML = '<svg viewBox="0 0 24 24" stroke="white" fill="none" width="16" height="16" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg> Run Analysis';
+  }
+}
+
+// ── RENDER RESULTS ──
+function renderResults(data) {
+  const resultsEl = document.getElementById('results');
+  const summaryBar = document.getElementById('summaryBar');
+  const container = document.getElementById('cardsContainer');
+
+  // Summary chips
+  const highCount = data.results.filter(r => r.output?.failure_probability?.toLowerCase() === 'high').length;
+  const medCount  = data.results.filter(r => r.output?.failure_probability?.toLowerCase() === 'medium').length;
+  const lowCount  = data.results.filter(r => r.output?.failure_probability?.toLowerCase() === 'low').length;
+
+  summaryBar.innerHTML = `
+    <div class="stat-chip"><div class="val">${data.total}</div><div class="lbl">Total<br>Records</div></div>
+    <div class="stat-chip"><div class="val" style="color:var(--green)">${lowCount}</div><div class="lbl">Low<br>Risk</div></div>
+    <div class="stat-chip"><div class="val" style="color:var(--amber)">${medCount}</div><div class="lbl">Medium<br>Risk</div></div>
+    <div class="stat-chip"><div class="val" style="color:var(--red)">${highCount}</div><div class="lbl">High<br>Risk</div></div>
+    ${data.failed > 0 ? `<div class="stat-chip"><div class="val" style="color:var(--red)">${data.failed}</div><div class="lbl">Failed<br>Requests</div></div>` : ''}
+  `;
+
+  // Cards
+  container.innerHTML = '';
+
+  data.results.forEach(r => {
+    container.appendChild(buildCard(r));
+  });
+
+  data.errors.forEach(err => {
+    const el = document.createElement('div');
+    el.className = 'error-card';
+    el.innerHTML = `<span>✗</span><span>Record ${err.index}: ${err.error}</span>`;
+    container.appendChild(el);
+  });
+
+  resultsEl.style.display = 'block';
+  document.getElementById('emptyState').style.display = 'none';
+  resultsEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function buildCard(r) {
+  const inp = r.input;
+  const out = r.output;
+  const prob = (out.failure_probability || '').toLowerCase();
+  const riskClass = prob === 'high' ? 'risk-high' : prob === 'medium' ? 'risk-medium' : 'risk-low';
+  const statusClass = (out.status || '').toLowerCase() === 'unsafe' ? 'status-unsafe' : 'status-safe';
+  const score = parseFloat(out.failure_risk_score || 0);
+  const scoreColor = score >= 0.7 ? 'var(--red)' : score >= 0.4 ? 'var(--amber)' : 'var(--green)';
+  const scorePct = Math.round(score * 100);
+
+  const card = document.createElement('div');
+  card.className = 'result-card';
+
+  card.innerHTML = `
+    <div class="card-header">
+      <span class="card-index">#${r.index}</span>
+      <span class="risk-badge ${riskClass}">${out.failure_probability || 'N/A'} Risk</span>
+      <span style="font-family:var(--mono);font-size:12px;color:var(--text-secondary);">${out.failure_type || '—'}</span>
+      <span class="status-chip ${statusClass}">${out.status || '—'}</span>
+    </div>
+    <div class="card-body">
+      <div class="card-left">
+        <div class="panel-label">Input Parameters</div>
+        <table class="json-table">
+          ${Object.entries(inp).map(([k, v]) => `
+            <tr>
+              <td class="jkey">${k}</td>
+              <td class="jval ${typeof v === 'number' ? 'num' : typeof v === 'boolean' ? 'bool' : 'str'}">${JSON.stringify(v)}</td>
+            </tr>
+          `).join('')}
+        </table>
+      </div>
+      <div class="card-right">
+        <div class="panel-label">Prediction Output</div>
+
+        <div class="risk-score-row">
+          <div class="score-num" style="color:${scoreColor}">${score.toFixed(2)}</div>
+          <div class="score-bar-wrap">
+            <div class="score-bar-track">
+              <div class="score-bar-fill" style="width:${scorePct}%;background:${scoreColor}"></div>
+            </div>
+            <div class="score-bar-label">risk score / 1.00</div>
+          </div>
+        </div>
+
+        ${out.failure_type ? `<div class="failure-type">⚠ ${out.failure_type}</div>` : ''}
+
+        <table class="json-table">
+          ${out.reason ? `
+            <tr>
+              <td class="jkey">reason</td>
+              <td class="jval str" style="color:var(--text-primary);font-family:var(--sans);font-size:12.5px;">${out.reason}</td>
+            </tr>` : ''}
+          ${out.recommendation ? `
+            <tr>
+              <td class="jkey">recommendation</td>
+              <td class="jval str" style="color:#93c5fd;font-family:var(--sans);font-size:12.5px;">${out.recommendation}</td>
+            </tr>` : ''}
+        </table>
+
+        <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border);">
+          <table class="json-table">
+            ${Object.entries(out)
+              .filter(([k]) => !['reason','recommendation','failure_type'].includes(k))
+              .map(([k,v]) => `
+                <tr>
+                  <td class="jkey">${k}</td>
+                  <td class="jval ${typeof v === 'number' ? 'num' : 'str'}">${JSON.stringify(v)}</td>
+                </tr>`).join('')}
+          </table>
+        </div>
+      </div>
+    </div>
+  `;
+
+  return card;
+}
+
+// ── HELPERS ──
+function clearAll() {
+  selectedFile = null;
+  parsedData = null;
+  document.getElementById('fileInput').value = '';
+  document.getElementById('fileInfo').style.display = 'none';
+  document.getElementById('counterBadge').style.display = 'none';
+  document.getElementById('analyzeBtn').disabled = true;
+  document.getElementById('results').style.display = 'none';
+  document.getElementById('emptyState').style.display = 'block';
+}
+
+function formatBytes(bytes) {
+  if (bytes < 1024) return bytes + ' B';
+  if (bytes < 1024*1024) return (bytes/1024).toFixed(1) + ' KB';
+  return (bytes/(1024*1024)).toFixed(1) + ' MB';
+}
+
+function showToast(msg, isErr = false) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast' + (isErr ? ' error' : '') + ' show';
+  setTimeout(() => t.className = 'toast', 3000);
+}
+</script>
+</body>
+</html>
