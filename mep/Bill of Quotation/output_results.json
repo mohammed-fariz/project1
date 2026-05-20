@@ -1,0 +1,44 @@
+[
+  {
+    "input": {
+      "project_type": "HVAC",
+      "drawing_file": "floor_plan_hvac.pdf",
+      "floor_area_sqft": 2500,
+      "units": "metric",
+      "elements_to_extract": [
+        "ducts",
+        "diffusers",
+        "fittings"
+      ],
+      "material_rates": {
+        "duct_15x7_per_meter": 25,
+        "diffuser_unit": 15,
+        "elbow_unit": 10
+      }
+    },
+    "output": {
+      "elements": {
+        "ducts": {
+          "length_m": 116,
+          "unit_rate": 25,
+          "total_cost": 2900
+        },
+        "diffusers": {
+          "quantity": 12,
+          "unit_rate": 15,
+          "total_cost": 180
+        },
+        "fittings": {
+          "elbow": {
+            "quantity": 39,
+            "unit_rate": 10,
+            "total_cost": 390
+          }
+        }
+      },
+      "grand_total_cost": 3470,
+      "remarks": "Estimated quantities based on floor area; limited input provided.",
+      "confidence_score": 0.65
+    }
+  }
+]

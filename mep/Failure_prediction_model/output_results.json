@@ -1,0 +1,159 @@
+[
+  {
+    "input": {
+      "anchor_type": "M10",
+      "load_kN": 12.5,
+      "material": "concrete",
+      "spacing_m": 1.8,
+      "edge_distance_mm": 80,
+      "environment": "outdoor",
+      "safety_factor": 1.2
+    },
+    "output": {
+      "failure_risk_score": 0.85,
+      "failure_probability": "High",
+      "failure_type": "Pull-out Failure",
+      "status": "Unsafe",
+      "reason": "Low edge distance and low safety factor indicate high risk.",
+      "recommendation": "Increase edge distance, add supports, use corrosion-resistant anchors, raise safety factor."
+    }
+  },
+  {
+    "input": {
+      "anchor_type": "M16",
+      "load_kN": 5.0,
+      "material": "steel",
+      "spacing_m": 1.0,
+      "edge_distance_mm": 150,
+      "environment": "indoor",
+      "safety_factor": 2.0
+    },
+    "output": {
+      "failure_risk_score": 0.12,
+      "failure_probability": "Low",
+      "failure_type": "Shear Failure",
+      "status": "Safe",
+      "reason": "Safety factor adequate; spacing and edge distance within safe limits.",
+      "recommendation": "Maintain spacing; inspect anchors periodically for loosening or corrosion."
+    }
+  },
+  {
+    "input": {
+      "anchor_type": "M10",
+      "load_kN": 15.0,
+      "material": "concrete",
+      "spacing_m": 2.0,
+      "edge_distance_mm": 60,
+      "environment": "outdoor",
+      "safety_factor": 1.1
+    },
+    "output": {
+      "failure_risk_score": 0.85,
+      "failure_probability": "High",
+      "failure_type": "Pull-out Failure",
+      "status": "Unsafe",
+      "reason": "Low edge distance and low safety factor elevate failure risk.",
+      "recommendation": "Increase edge distance, reduce spacing, upgrade anchors, and improve corrosion protection."
+    }
+  },
+  {
+    "input": {
+      "system": "mechanical",
+      "anchor_type": "M8",
+      "load_kN": 20.0,
+      "material": "concrete",
+      "spacing_m": 2.5,
+      "edge_distance_mm": 60,
+      "environment": "outdoor",
+      "safety_factor": 1.0
+    },
+    "output": {
+      "failure_risk_score": 0.9,
+      "failure_probability": "High",
+      "failure_type": "Pull-out Failure",
+      "status": "Unsafe",
+      "reason": "Safety factor 1.0 with low edge distance and high load.",
+      "recommendation": "Increase edge distance, reduce spacing, use larger anchors, and apply corrosion protection."
+    }
+  },
+  {
+    "input": {
+      "system": "electrical",
+      "anchor_type": "M10",
+      "load_kN": 16.0,
+      "material": "concrete",
+      "spacing_m": 2.0,
+      "edge_distance_mm": 80,
+      "environment": "outdoor",
+      "safety_factor": 1.2
+    },
+    "output": {
+      "failure_risk_score": 0.86,
+      "failure_probability": "High",
+      "failure_type": "Pull-out Failure",
+      "status": "Unsafe",
+      "reason": "Low edge distance and safety factor indicate high pull-out risk.",
+      "recommendation": "Increase edge distance, add supports, upgrade anchors, and apply corrosion protection."
+    }
+  },
+  {
+    "input": {
+      "system": "electrical",
+      "anchor_type": "M12",
+      "load_kN": 22.0,
+      "material": "concrete",
+      "spacing_m": 2.3,
+      "edge_distance_mm": 75,
+      "environment": "outdoor",
+      "safety_factor": 1.1
+    },
+    "output": {
+      "failure_risk_score": 0.9,
+      "failure_probability": "High",
+      "failure_type": "Pull-out Failure",
+      "status": "Unsafe",
+      "reason": "Low edge distance and low safety factor under high load.",
+      "recommendation": "Add supports to reduce spacing, improve edge distance, upgrade anchors, apply corrosion protection."
+    }
+  },
+  {
+    "input": {
+      "system": "plumbing",
+      "anchor_type": "M10",
+      "load_kN": 17.0,
+      "material": "concrete",
+      "spacing_m": 2.1,
+      "edge_distance_mm": 65,
+      "environment": "outdoor",
+      "safety_factor": 1.2
+    },
+    "output": {
+      "failure_risk_score": 0.9,
+      "failure_probability": "High",
+      "failure_type": "Pull-out Failure",
+      "status": "Unsafe",
+      "reason": "Low safety factor and inadequate edge distance outdoors.",
+      "recommendation": "Increase edge distance, reduce spacing, use corrosion-resistant anchors."
+    }
+  },
+  {
+    "input": {
+      "system": "plumbing",
+      "anchor_type": "M8",
+      "load_kN": 19.0,
+      "material": "concrete",
+      "spacing_m": 2.4,
+      "edge_distance_mm": 50,
+      "environment": "outdoor",
+      "safety_factor": 1.0
+    },
+    "output": {
+      "failure_risk_score": 0.9,
+      "failure_probability": "High",
+      "failure_type": "Pull-out Failure",
+      "status": "Unsafe",
+      "reason": "Low edge distance and high load create unsafe pull-out risk.",
+      "recommendation": "Increase edge distance, add supports, use corrosion-resistant anchors, raise safety factor."
+    }
+  }
+]

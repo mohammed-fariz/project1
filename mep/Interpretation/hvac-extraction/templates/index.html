@@ -1,0 +1,824 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MEP Duct Extractor</title>
+
+    <style>
+        :root {
+            --bg: #090b0f;
+            --panel: #11151c;
+            --panel-2: #151a23;
+            --border: #252d3a;
+            --text: #eef3f8;
+            --muted: #8b96a8;
+            --accent: #4ade80;
+            --accent-soft: rgba(74, 222, 128, 0.12);
+            --danger: #fb7185;
+            --warn: #fbbf24;
+            --code: #cbd5e1;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            min-height: 100vh;
+            background:
+                radial-gradient(circle at top left, rgba(74, 222, 128, 0.12), transparent 32%),
+                radial-gradient(circle at bottom right, rgba(59, 130, 246, 0.10), transparent 34%),
+                var(--bg);
+            color: var(--text);
+            font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        }
+
+        .page {
+            width: min(1100px, calc(100% - 32px));
+            margin: 0 auto;
+            padding: 48px 0 72px;
+        }
+
+        .topbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            gap: 24px;
+            margin-bottom: 36px;
+        }
+
+        .title-block h1 {
+            font-size: clamp(2rem, 5vw, 4.5rem);
+            line-height: 0.95;
+            letter-spacing: -0.07em;
+        }
+
+        .title-block span {
+            color: var(--accent);
+        }
+
+        .title-block p {
+            margin-top: 14px;
+            color: var(--muted);
+            font-size: 0.95rem;
+        }
+
+        .pill {
+            border: 1px solid var(--border);
+            background: rgba(255, 255, 255, 0.03);
+            color: var(--muted);
+            padding: 8px 12px;
+            border-radius: 999px;
+            font-size: 0.78rem;
+            white-space: nowrap;
+        }
+
+        .shell {
+            display: grid;
+            grid-template-columns: 0.85fr 1.15fr;
+            gap: 20px;
+            align-items: start;
+        }
+
+        .card {
+            background: linear-gradient(180deg, var(--panel), #0d1118);
+            border: 1px solid var(--border);
+            border-radius: 22px;
+            box-shadow: 0 24px 80px rgba(0, 0, 0, 0.28);
+            overflow: hidden;
+        }
+
+        .card-header {
+            padding: 18px 20px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .card-header h2 {
+            font-size: 0.9rem;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        .card-header small {
+            color: var(--muted);
+            font-size: 0.76rem;
+        }
+
+        .card-body {
+            padding: 20px;
+        }
+
+        .drop-zone {
+            position: relative;
+            min-height: 230px;
+            border: 1.5px dashed var(--border);
+            border-radius: 18px;
+            background:
+                linear-gradient(135deg, rgba(255, 255, 255, 0.035), transparent),
+                var(--panel-2);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 28px;
+            cursor: pointer;
+            transition: 180ms ease;
+        }
+
+        .drop-zone:hover,
+        .drop-zone.dragover {
+            border-color: var(--accent);
+            background: var(--accent-soft);
+        }
+
+        .drop-zone input {
+            position: absolute;
+            inset: 0;
+            opacity: 0;
+            cursor: pointer;
+        }
+
+        .upload-mark {
+            width: 54px;
+            height: 54px;
+            border-radius: 18px;
+            border: 1px solid var(--border);
+            display: grid;
+            place-items: center;
+            margin-bottom: 18px;
+            background: rgba(255, 255, 255, 0.035);
+            color: var(--accent);
+            font-size: 1.6rem;
+            font-weight: 700;
+        }
+
+        .drop-zone h3 {
+            font-size: 1.12rem;
+            margin-bottom: 8px;
+        }
+
+        .drop-zone p {
+            color: var(--muted);
+            font-size: 0.88rem;
+            line-height: 1.5;
+        }
+
+        .file-name {
+            margin-top: 18px;
+            color: var(--accent);
+            font-size: 0.86rem;
+            word-break: break-word;
+        }
+
+        .actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 16px;
+        }
+
+        button {
+            border: 0;
+            border-radius: 14px;
+            padding: 12px 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 160ms ease;
+            font-family: inherit;
+        }
+
+        button:disabled {
+            opacity: 0.45;
+            cursor: not-allowed;
+        }
+
+        button:not(:disabled):hover {
+            transform: translateY(-1px);
+        }
+
+        .btn-primary {
+            flex: 1;
+            background: var(--accent);
+            color: #041008;
+        }
+
+        .btn-secondary {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--muted);
+        }
+
+        .status {
+            display: none;
+            margin-top: 16px;
+            border-radius: 14px;
+            padding: 12px 14px;
+            font-size: 0.88rem;
+            border: 1px solid var(--border);
+        }
+
+        .status.show {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .status.loading {
+            color: var(--warn);
+            background: rgba(251, 191, 36, 0.08);
+            border-color: rgba(251, 191, 36, 0.25);
+        }
+
+        .status.success {
+            color: var(--accent);
+            background: var(--accent-soft);
+            border-color: rgba(74, 222, 128, 0.25);
+        }
+
+        .status.error {
+            color: var(--danger);
+            background: rgba(251, 113, 133, 0.08);
+            border-color: rgba(251, 113, 133, 0.25);
+        }
+
+        .spinner {
+            width: 15px;
+            height: 15px;
+            border: 2px solid currentColor;
+            border-top-color: transparent;
+            border-radius: 50%;
+            animation: spin 750ms linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .meta-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+        }
+
+        .meta {
+            background: rgba(255, 255, 255, 0.035);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 14px;
+        }
+
+        .meta strong {
+            display: block;
+            font-size: 1.65rem;
+            line-height: 1;
+            color: var(--accent);
+            margin-bottom: 8px;
+        }
+
+        .meta span {
+            color: var(--muted);
+            font-size: 0.78rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+        }
+
+        .db-box {
+            margin-top: 14px;
+            padding: 14px;
+            border-radius: 16px;
+            border: 1px solid var(--border);
+            background: rgba(255, 255, 255, 0.035);
+            color: var(--muted);
+            font-size: 0.88rem;
+        }
+
+        .db-box b {
+            color: var(--text);
+        }
+
+        .results {
+            display: none;
+            margin-top: 20px;
+            grid-column: 1 / -1;
+        }
+
+        .results.show {
+            display: block;
+        }
+
+        .tabs {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 14px;
+        }
+
+        .tab {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--muted);
+            padding: 9px 12px;
+            border-radius: 999px;
+            font-size: 0.78rem;
+        }
+
+        .tab.active {
+            color: #041008;
+            background: var(--accent);
+            border-color: var(--accent);
+        }
+
+        .json-card {
+            border: 1px solid var(--border);
+            background: #070a0f;
+            border-radius: 20px;
+            overflow: hidden;
+        }
+
+        .json-toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 14px;
+            border-bottom: 1px solid var(--border);
+            background: rgba(255, 255, 255, 0.025);
+        }
+
+        .json-toolbar span {
+            color: var(--muted);
+            font-size: 0.8rem;
+        }
+
+        .copy-btn {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--muted);
+            padding: 7px 10px;
+            border-radius: 10px;
+            font-size: 0.78rem;
+        }
+
+        pre {
+            margin: 0;
+            padding: 18px;
+            max-height: 520px;
+            overflow: auto;
+            color: var(--code);
+            font-family: "Cascadia Code", "Consolas", monospace;
+            font-size: 0.85rem;
+            line-height: 1.65;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+
+        .key { color: #67e8f9; }
+        .string { color: #bbf7d0; }
+        .number { color: #fef08a; }
+        .boolean { color: #fdba74; }
+        .null { color: #94a3b8; }
+
+        .empty {
+            color: var(--muted);
+            padding: 26px;
+            text-align: center;
+        }
+
+        @media (max-width: 850px) {
+            .topbar {
+                display: block;
+            }
+
+            .pill {
+                display: inline-block;
+                margin-top: 18px;
+            }
+
+            .shell {
+                grid-template-columns: 1fr;
+            }
+
+            .meta-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        @media (max-width: 520px) {
+            .actions {
+                flex-direction: column;
+            }
+
+            .meta-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <main class="page">
+        <section class="topbar">
+            <div class="title-block">
+                <h1>MEP <span>Duct</span><br />Extractor</h1>
+                <p>Upload a PDF or image drawing. Extract duct data and store the JSON result in MySQL.</p>
+            </div>
+            <div class="pill">Endpoint: POST /extract-ducts</div>
+        </section>
+
+        <section class="shell">
+            <div class="card">
+                <div class="card-header">
+                    <h2>Upload Drawing</h2>
+                    <small>PDF / PNG / JPG</small>
+                </div>
+
+                <div class="card-body">
+                    <div class="drop-zone" id="dropZone">
+                        <input id="fileInput" type="file" accept="application/pdf,image/*" />
+
+                        <div class="upload-mark">+</div>
+                        <h3>Select or drop a file</h3>
+                        <p>The backend will convert PDFs/images, call the extraction service, then save the result JSON to MySQL.</p>
+
+                        <div class="file-name" id="fileName">No file selected</div>
+                    </div>
+
+                    <div class="actions">
+                        <button class="btn-primary" id="extractBtn" disabled>
+                            Extract Ducts
+                        </button>
+                        <button class="btn-secondary" id="clearBtn">
+                            Clear
+                        </button>
+                    </div>
+
+                    <div class="status" id="statusBox">
+                        <div class="spinner" id="spinner"></div>
+                        <span id="statusText"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h2>Summary</h2>
+                    <small id="summaryState">Waiting for extraction</small>
+                </div>
+
+                <div class="card-body">
+                    <div class="meta-grid">
+                        <div class="meta">
+                            <strong id="statTrunks">0</strong>
+                            <span>Main trunk</span>
+                        </div>
+
+                        <div class="meta">
+                            <strong id="statBranches">0</strong>
+                            <span>Branches</span>
+                        </div>
+
+                        <div class="meta">
+                            <strong id="statRooms">0</strong>
+                            <span>Rooms</span>
+                        </div>
+
+                        <div class="meta">
+                            <strong id="statSpecial">0</strong>
+                            <span>Special elements</span>
+                        </div>
+                    </div>
+
+                    <div class="db-box">
+                        Database record ID:
+                        <b id="dbId">Not saved yet</b>
+                    </div>
+                </div>
+            </div>
+
+            <div class="results" id="resultsSection">
+                <div class="tabs">
+                    <button class="tab active" data-view="full">Full Response</button>
+                    <button class="tab" data-view="result">Result Only</button>
+                    <button class="tab" data-view="trunk">Main Trunk</button>
+                    <button class="tab" data-view="branches">Branches</button>
+                    <button class="tab" data-view="rooms">Rooms</button>
+                    <button class="tab" data-view="special">Special</button>
+                </div>
+
+                <div class="json-card">
+                    <div class="json-toolbar">
+                        <span id="jsonTitle">Full Response</span>
+                        <button class="copy-btn" id="copyBtn">Copy JSON</button>
+                    </div>
+
+                    <pre id="jsonOutput"><div class="empty">No extraction result yet.</div></pre>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        const fileInput = document.getElementById("fileInput");
+        const dropZone = document.getElementById("dropZone");
+        const fileName = document.getElementById("fileName");
+        const extractBtn = document.getElementById("extractBtn");
+        const clearBtn = document.getElementById("clearBtn");
+
+        const statusBox = document.getElementById("statusBox");
+        const statusText = document.getElementById("statusText");
+        const spinner = document.getElementById("spinner");
+
+        const resultsSection = document.getElementById("resultsSection");
+        const jsonOutput = document.getElementById("jsonOutput");
+        const jsonTitle = document.getElementById("jsonTitle");
+        const copyBtn = document.getElementById("copyBtn");
+
+        const summaryState = document.getElementById("summaryState");
+        const dbId = document.getElementById("dbId");
+
+        const statTrunks = document.getElementById("statTrunks");
+        const statBranches = document.getElementById("statBranches");
+        const statRooms = document.getElementById("statRooms");
+        const statSpecial = document.getElementById("statSpecial");
+
+        let lastPayload = null;
+        let lastResult = null;
+        let currentView = "full";
+
+        fileInput.addEventListener("change", handleFileSelect);
+
+        dropZone.addEventListener("dragover", function (event) {
+            event.preventDefault();
+            dropZone.classList.add("dragover");
+        });
+
+        dropZone.addEventListener("dragleave", function () {
+            dropZone.classList.remove("dragover");
+        });
+
+        dropZone.addEventListener("drop", function (event) {
+            event.preventDefault();
+            dropZone.classList.remove("dragover");
+
+            const file = event.dataTransfer.files[0];
+            if (!file) return;
+
+            const dataTransfer = new DataTransfer();
+            dataTransfer.items.add(file);
+            fileInput.files = dataTransfer.files;
+
+            handleFileSelect();
+        });
+
+        extractBtn.addEventListener("click", uploadFile);
+        clearBtn.addEventListener("click", clearAll);
+        copyBtn.addEventListener("click", copyCurrentJson);
+
+        document.querySelectorAll(".tab").forEach(function (tab) {
+            tab.addEventListener("click", function () {
+                document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+                tab.classList.add("active");
+
+                currentView = tab.dataset.view;
+                renderCurrentView();
+            });
+        });
+
+        function handleFileSelect() {
+            const file = fileInput.files[0];
+
+            if (!file) {
+                fileName.textContent = "No file selected";
+                extractBtn.disabled = true;
+                return;
+            }
+
+            const sizeKb = (file.size / 1024).toFixed(1);
+            fileName.textContent = `${file.name} · ${sizeKb} KB`;
+            extractBtn.disabled = false;
+        }
+
+        function setStatus(type, message, isLoading = false) {
+            statusBox.className = `status show ${type}`;
+            statusText.textContent = message;
+            spinner.style.display = isLoading ? "block" : "none";
+        }
+
+        function hideStatus() {
+            statusBox.className = "status";
+            statusText.textContent = "";
+            spinner.style.display = "none";
+        }
+
+        async function uploadFile() {
+            const file = fileInput.files[0];
+            if (!file) return;
+
+            const formData = new FormData();
+            formData.append("file", file);
+
+            extractBtn.disabled = true;
+            setStatus("loading", "Extracting duct data and saving result to MySQL...", true);
+            summaryState.textContent = "Processing";
+            resultsSection.classList.remove("show");
+
+            try {
+                const response = await fetch("/extract-ducts", {
+                    method: "POST",
+                    body: formData
+                });
+
+                const payload = await response.json();
+
+                if (!response.ok || payload.error) {
+                    throw new Error(payload.error || `Request failed with status ${response.status}`);
+                }
+
+                /*
+                    Flask returns:
+                    {
+                        id: extraction_id,
+                        result: result
+                    }
+
+                    So the actual extraction JSON is payload.result.
+                */
+                lastPayload = payload;
+                lastResult = payload.result || {};
+
+                updateSummary(payload, lastResult);
+
+                currentView = "full";
+                activateTab("full");
+                renderCurrentView();
+
+                resultsSection.classList.add("show");
+                setStatus("success", "Extraction complete. Result saved to MySQL.");
+                summaryState.textContent = "Extraction complete";
+            } catch (error) {
+                setStatus("error", error.message);
+                summaryState.textContent = "Extraction failed";
+            } finally {
+                extractBtn.disabled = false;
+            }
+        }
+
+        function updateSummary(payload, result) {
+            const ductNetwork = result.duct_network || {};
+
+            const trunks = countItems(ductNetwork.main_trunk);
+            const branches = countItems(ductNetwork.branches);
+            const rooms = countItems(result.rooms);
+            const special = countItems(result.special_elements);
+
+            statTrunks.textContent = trunks;
+            statBranches.textContent = branches;
+            statRooms.textContent = rooms;
+            statSpecial.textContent = special;
+
+            dbId.textContent = payload.id ?? "Not returned";
+        }
+
+        function countItems(value) {
+            if (Array.isArray(value)) return value.length;
+            if (value && typeof value === "object") return Object.keys(value).length;
+            return 0;
+        }
+
+        function activateTab(viewName) {
+            document.querySelectorAll(".tab").forEach(function (tab) {
+                tab.classList.toggle("active", tab.dataset.view === viewName);
+            });
+        }
+
+        function renderCurrentView() {
+            if (!lastPayload || !lastResult) {
+                jsonOutput.innerHTML = `<div class="empty">No extraction result yet.</div>`;
+                return;
+            }
+
+            const ductNetwork = lastResult.duct_network || {};
+
+            const viewMap = {
+                full: {
+                    title: "Full Response",
+                    data: lastPayload
+                },
+                result: {
+                    title: "Result Only",
+                    data: lastResult
+                },
+                trunk: {
+                    title: "Main Trunk",
+                    data: ductNetwork.main_trunk || []
+                },
+                branches: {
+                    title: "Branches",
+                    data: ductNetwork.branches || []
+                },
+                rooms: {
+                    title: "Rooms",
+                    data: lastResult.rooms || []
+                },
+                special: {
+                    title: "Special Elements",
+                    data: lastResult.special_elements || []
+                }
+            };
+
+            const selected = viewMap[currentView] || viewMap.full;
+
+            jsonTitle.textContent = selected.title;
+            jsonOutput.innerHTML = syntaxHighlight(selected.data);
+        }
+
+        function syntaxHighlight(data) {
+            const json = JSON.stringify(data, null, 2);
+
+            const escaped = json
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;");
+
+            return escaped.replace(
+                /("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+\.?\d*)/g,
+                function (match) {
+                    if (/^"/.test(match)) {
+                        if (/:$/.test(match)) {
+                            return `<span class="key">${match}</span>`;
+                        }
+                        return `<span class="string">${match}</span>`;
+                    }
+
+                    if (/true|false/.test(match)) {
+                        return `<span class="boolean">${match}</span>`;
+                    }
+
+                    if (/null/.test(match)) {
+                        return `<span class="null">${match}</span>`;
+                    }
+
+                    return `<span class="number">${match}</span>`;
+                }
+            );
+        }
+
+        async function copyCurrentJson() {
+            if (!lastPayload || !lastResult) return;
+
+            const ductNetwork = lastResult.duct_network || {};
+
+            const viewData = {
+                full: lastPayload,
+                result: lastResult,
+                trunk: ductNetwork.main_trunk || [],
+                branches: ductNetwork.branches || [],
+                rooms: lastResult.rooms || [],
+                special: lastResult.special_elements || []
+            };
+
+            const selectedData = viewData[currentView] || lastPayload;
+
+            await navigator.clipboard.writeText(JSON.stringify(selectedData, null, 2));
+
+            copyBtn.textContent = "Copied";
+            setTimeout(() => {
+                copyBtn.textContent = "Copy JSON";
+            }, 1200);
+        }
+
+        function clearAll() {
+            fileInput.value = "";
+            fileName.textContent = "No file selected";
+            extractBtn.disabled = true;
+
+            lastPayload = null;
+            lastResult = null;
+            currentView = "full";
+
+            statTrunks.textContent = "0";
+            statBranches.textContent = "0";
+            statRooms.textContent = "0";
+            statSpecial.textContent = "0";
+
+            dbId.textContent = "Not saved yet";
+            summaryState.textContent = "Waiting for extraction";
+
+            resultsSection.classList.remove("show");
+            jsonOutput.innerHTML = `<div class="empty">No extraction result yet.</div>`;
+
+            activateTab("full");
+            hideStatus();
+        }
+    </script>
+</body>
+</html>

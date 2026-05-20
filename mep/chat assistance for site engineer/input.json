@@ -1,0 +1,10 @@
+{
+  "user_role": "site engineer",
+  "query": "Which anchor should I use for 8kN load in concrete?",
+  "location": "Building A - Floor 2",
+  "context": {
+    "material": "concrete",
+    "application": "facade support",
+    "environment": "outdoor"
+  }
+}

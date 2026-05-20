@@ -1,0 +1,72 @@
+[
+  {
+    "system": "mechanical",
+    "anchor_type": "M16",
+    "load_kN": 6.0,
+    "material": "reinforced_concrete",
+    "spacing_m": 2.5,
+    "edge_distance_mm": 180,
+    "environment": "indoor",
+    "safety_factor": 2.5,
+    "installation_quality": "excellent",
+    "vibration": "low",
+    "temperature_c": 25,
+    "expected_status": "safe"
+  },
+  {
+    "system": "electrical",
+    "anchor_type": "M12",
+    "load_kN": 4.5,
+    "material": "concrete",
+    "spacing_m": 2.0,
+    "edge_distance_mm": 150,
+    "environment": "indoor_dry",
+    "safety_factor": 2.2,
+    "installation_quality": "proper_torque",
+    "vibration": "minimal",
+    "temperature_c": 28,
+    "expected_status": "safe"
+  },
+  {
+    "system": "plumbing",
+    "anchor_type": "M14",
+    "load_kN": 7.5,
+    "material": "high_strength_concrete",
+    "spacing_m": 2.8,
+    "edge_distance_mm": 200,
+    "environment": "outdoor_protected",
+    "safety_factor": 2.8,
+    "installation_quality": "professional_installation",
+    "vibration": "low",
+    "temperature_c": 30,
+    "expected_status": "safe"
+  },
+  {
+    "system": "hvac",
+    "anchor_type": "M16",
+    "load_kN": 8.0,
+    "material": "reinforced_concrete",
+    "spacing_m": 3.0,
+    "edge_distance_mm": 220,
+    "environment": "indoor_controlled",
+    "safety_factor": 3.0,
+    "installation_quality": "excellent",
+    "vibration": "moderate_controlled",
+    "temperature_c": 24,
+    "expected_status": "safe"
+  },
+  {
+    "system": "structural_support",
+    "anchor_type": "M20",
+    "load_kN": 10.0,
+    "material": "high_grade_concrete",
+    "spacing_m": 3.5,
+    "edge_distance_mm": 250,
+    "environment": "indoor",
+    "safety_factor": 3.5,
+    "installation_quality": "precision_installation",
+    "vibration": "very_low",
+    "temperature_c": 22,
+    "expected_status": "safe"
+  }
+]

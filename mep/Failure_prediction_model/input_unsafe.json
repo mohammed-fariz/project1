@@ -1,0 +1,98 @@
+[
+  {
+    "system": "mechanical",
+    "anchor_type": "M6",
+    "load_kN": 35.0,
+    "material": "cracked_concrete",
+    "spacing_m": 0.4,
+    "edge_distance_mm": 20,
+    "environment": "corrosive_outdoor_marine",
+    "safety_factor": 0.8,
+    "installation_quality": "poor",
+    "vibration": "high",
+    "temperature_c": 75,
+    "failure_expected": true,
+    "failure_mode": [
+      "anchor_pullout",
+      "concrete_breakout",
+      "steel_failure",
+      "corrosion_failure"
+    ]
+  },
+  {
+    "system": "electrical",
+    "anchor_type": "M8",
+    "load_kN": 42.0,
+    "material": "hollow_block",
+    "spacing_m": 0.3,
+    "edge_distance_mm": 15,
+    "environment": "chemical_exposure",
+    "safety_factor": 0.7,
+    "installation_quality": "improper_torque",
+    "vibration": "extreme",
+    "temperature_c": 90,
+    "failure_expected": true,
+    "failure_mode": [
+      "anchor_slip",
+      "substrate_failure",
+      "fatigue_failure"
+    ]
+  },
+  {
+    "system": "plumbing",
+    "anchor_type": "M10",
+    "load_kN": 55.0,
+    "material": "aged_concrete",
+    "spacing_m": 0.5,
+    "edge_distance_mm": 25,
+    "environment": "outdoor_humid",
+    "safety_factor": 0.9,
+    "installation_quality": "misaligned_installation",
+    "vibration": "high",
+    "temperature_c": 60,
+    "failure_expected": true,
+    "failure_mode": [
+      "concrete_cracking",
+      "anchor_pullout",
+      "joint_failure"
+    ]
+  },
+  {
+    "system": "hvac",
+    "anchor_type": "M6",
+    "load_kN": 48.0,
+    "material": "lightweight_concrete",
+    "spacing_m": 0.2,
+    "edge_distance_mm": 10,
+    "environment": "saltwater_environment",
+    "safety_factor": 0.6,
+    "installation_quality": "incorrect_embedment",
+    "vibration": "continuous",
+    "temperature_c": 85,
+    "failure_expected": true,
+    "failure_mode": [
+      "dynamic_fatigue_failure",
+      "anchor_pullout",
+      "corrosion_failure"
+    ]
+  },
+  {
+    "system": "structural_support",
+    "anchor_type": "M12",
+    "load_kN": 80.0,
+    "material": "cracked_concrete",
+    "spacing_m": 0.6,
+    "edge_distance_mm": 30,
+    "environment": "fire_exposure_zone",
+    "safety_factor": 0.5,
+    "installation_quality": "poor_drilling",
+    "vibration": "severe",
+    "temperature_c": 120,
+    "failure_expected": true,
+    "failure_mode": [
+      "steel_yield_failure",
+      "thermal_failure",
+      "progressive_collapse"
+    ]
+  }
+]

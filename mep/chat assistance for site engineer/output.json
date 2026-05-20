@@ -1,0 +1,8 @@
+{
+  "recommended_solution": "Recommendation requires additional input data",
+  "reason": "Missing load direction, embedment depth, concrete strength, edge/distances and safety factors.",
+  "installation_tip": "Do not install yet; gather concrete f'c, load direction (tension/shear/combined), fixture thickness, edge distance and required embedment.",
+  "safety_note": "Do not assume 8 kN is allowable capacity\u2014apply appropriate safety factor and verify anchor design for outdoor exposure.",
+  "reference": "Refer to EN 1992-1-1 (Eurocode 2) and relevant anchor design guidelines (ETA/ACI) for concrete anchors.",
+  "confidence_score": 0.35
+}
